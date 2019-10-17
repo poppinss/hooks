@@ -1,0 +1,81 @@
+{
+  "name": "@poppinss/hooks",
+  "version": "0.0.0",
+  "description": "A no brainer hooks module for execute before/after lifecycle hooks",
+  "dependencies": {},
+  "devDependencies": {
+    "@adonisjs/fold": "^6.2.2",
+    "@adonisjs/mrm-preset": "^2.1.0",
+    "@types/node": "^12.11.1",
+    "commitizen": "^4.0.3",
+    "cz-conventional-changelog": "^3.0.2",
+    "del-cli": "^3.0.0",
+    "doctoc": "^1.4.0",
+    "husky": "^3.0.9",
+    "japa": "^3.0.1",
+    "mrm": "^1.2.2",
+    "np": "^5.1.1",
+    "ts-node": "^8.4.1",
+    "tslint": "^5.20.0",
+    "tslint-eslint-rules": "^5.4.0",
+    "typedoc": "^0.15.0",
+    "typedoc-plugin-external-module-name": "^2.1.0",
+    "typedoc-plugin-markdown": "^2.2.11",
+    "typescript": "^3.6.4"
+  },
+  "scripts": {
+    "mrm": "mrm --preset=@adonisjs/mrm-preset",
+    "pretest": "npm run lint",
+    "test": "node japaFile.js",
+    "lint": "tslint --project tsconfig.json",
+    "clean": "del build",
+    "compile": "npm run lint && npm run clean && tsc",
+    "build": "npm run compile && typedoc --theme markdown --excludePrivate --HideSources && git add docs",
+    "commit": "git-cz",
+    "release": "np",
+    "version": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/poppinss/hooks.git"
+  },
+  "keywords": [
+    "hooks",
+    "poppinss"
+  ],
+  "author": "virk,poppinss",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/poppinss/hooks/issues"
+  },
+  "homepage": "https://github.com/poppinss/hooks#readme",
+  "nyc": {
+    "exclude": [
+      "test"
+    ],
+    "extension": [
+      ".ts"
+    ]
+  },
+  "main": "build/index.js",
+  "files": [
+    "build/src",
+    "build/index.d.ts",
+    "build/index.js"
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "doctoc README.md --title='## Table of contents' && git add README.md",
+      "commit-msg": "node ./node_modules/@adonisjs/mrm-preset/validateCommit/conventional/validate.js"
+    }
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "np": {
+    "contents": ".",
+    "anyBranch": false
+  }
+}
