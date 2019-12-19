@@ -2,32 +2,38 @@
   "name": "@poppinss/hooks",
   "version": "1.0.0",
   "description": "A no brainer hooks module for execute before/after lifecycle hooks",
+  "main": "build/index.js",
+  "files": [
+    "build/src",
+    "build/index.d.ts",
+    "build/index.js"
+  ],
   "dependencies": {},
   "devDependencies": {
-    "@adonisjs/fold": "^6.2.2",
-    "@adonisjs/mrm-preset": "^2.1.0",
-    "@types/node": "^12.11.1",
+    "@adonisjs/fold": "^6.2.3",
+    "@adonisjs/mrm-preset": "^2.2.3",
+    "@types/node": "^12.12.21",
     "commitizen": "^4.0.3",
     "cz-conventional-changelog": "^3.0.2",
     "del-cli": "^3.0.0",
     "doctoc": "^1.4.0",
-    "husky": "^3.0.9",
+    "eslint": "^6.7.2",
+    "eslint-plugin-adonis": "^1.0.4",
+    "husky": "^3.1.0",
     "japa": "^3.0.1",
-    "mrm": "^1.2.2",
-    "np": "^5.1.1",
-    "ts-node": "^8.4.1",
-    "tslint": "^5.20.0",
-    "tslint-eslint-rules": "^5.4.0",
-    "typedoc": "^0.15.0",
+    "mrm": "^2.0.2",
+    "np": "^5.2.1",
+    "ts-node": "^8.5.4",
+    "typedoc": "^0.15.5",
     "typedoc-plugin-external-module-name": "^2.1.0",
-    "typedoc-plugin-markdown": "^2.2.11",
-    "typescript": "^3.6.4"
+    "typedoc-plugin-markdown": "^2.2.14",
+    "typescript": "^3.7.3"
   },
   "scripts": {
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "pretest": "npm run lint",
     "test": "node japaFile.js",
-    "lint": "tslint --project tsconfig.json",
+    "lint": "eslint . --ext=.ts",
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
     "build": "npm run compile && typedoc --theme markdown --excludePrivate --HideSources && git add docs",
@@ -57,12 +63,6 @@
       ".ts"
     ]
   },
-  "main": "build/index.js",
-  "files": [
-    "build/src",
-    "build/index.d.ts",
-    "build/index.js"
-  ],
   "husky": {
     "hooks": {
       "pre-commit": "doctoc README.md --title='## Table of contents' && git add README.md",
