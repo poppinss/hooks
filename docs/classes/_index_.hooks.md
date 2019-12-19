@@ -30,13 +30,13 @@ for user facing objects.
 
 ###  constructor
 
-\+ **new Hooks**(`_resolver?`: IocResolverContract): *[Hooks](_index_.hooks.md)*
+\+ **new Hooks**(`resolver?`: IocResolverContract): *[Hooks](_index_.hooks.md)*
 
 **Parameters:**
 
 Name | Type |
 ------ | ------ |
-`_resolver?` | IocResolverContract |
+`resolver?` | IocResolverContract |
 
 **Returns:** *[Hooks](_index_.hooks.md)*
 
