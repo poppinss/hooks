@@ -18,7 +18,7 @@ test.group('Hooks', () => {
     function beforeSave () {}
     hooks.add('before', 'save', beforeSave)
 
-    assert.deepEqual(hooks['_hooks'].before.get('save'), new Set([beforeSave]))
+    assert.deepEqual(hooks['hooks'].before.get('save'), new Set([beforeSave]))
   })
 
   test('execute added hooks in sequence', async (assert) => {
