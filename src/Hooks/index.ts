@@ -48,6 +48,19 @@ export class Hooks {
   }
 
   /**
+   * Returns a boolean whether a handler has been already registered or not
+   */
+  public has (lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string): boolean {
+    const handlers = this.hooks[lifecycle].get(action)
+    const resolvedHandler = this.resolveHandler(handler)
+    if (!handlers) {
+      return false
+    }
+
+    return handlers.has(resolvedHandler)
+  }
+
+  /**
    * Register hook handler for a given event and lifecycle
    */
   public add (lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string): this {

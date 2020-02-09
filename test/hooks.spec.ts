@@ -157,6 +157,21 @@ test.group('Hooks', () => {
     await hooks.exec('before', 'save', ['foo', 'bar'])
     assert.deepEqual(stack, [])
   })
+
+  test('find if a hook already exists', async (assert) => {
+    const stack: string[] = []
+    const hooks = new Hooks()
+
+    function beforeSave (): Promise<void> {
+      return new Promise((resolve) => {
+        stack.push('one')
+        setTimeout(resolve, 100)
+      })
+    }
+
+    hooks.add('before', 'save', beforeSave)
+    assert.isTrue(hooks.has('before', 'save', beforeSave))
+  })
 })
 
 test.group('Hooks | Ioc Resolver', () => {
@@ -242,5 +257,23 @@ test.group('Hooks | Ioc Resolver', () => {
 
     await hooks.exec('before', 'save', ['foo', 'bar'])
     assert.deepEqual(stack, [])
+  })
+
+  test('find if ioc container reference hook already exists', async (assert) => {
+    const stack: string[] = []
+
+    const ioc = new Ioc()
+    ioc.bind('User', () => {
+      return {
+        save () {
+          stack.push(String(stack.length + 1))
+        },
+      }
+    })
+
+    const hooks = new Hooks(ioc.getResolver())
+
+    hooks.add('before', 'save', 'User.save')
+    assert.isTrue(hooks.has('before', 'save', 'User.save'))
   })
 })
