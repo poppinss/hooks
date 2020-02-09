@@ -24,6 +24,7 @@ for user facing objects.
 * [add](_index_.hooks.md#add)
 * [clear](_index_.hooks.md#clear)
 * [exec](_index_.hooks.md#exec)
+* [has](_index_.hooks.md#has)
 * [remove](_index_.hooks.md#remove)
 
 ## Constructors
@@ -92,6 +93,24 @@ Name | Type |
 `...data` | any[] |
 
 **Returns:** *Promise‹void›*
+
+___
+
+###  has
+
+▸ **has**(`lifecycle`: "before" | "after", `action`: string, `handler`: HooksHandler | string): *boolean*
+
+Returns a boolean whether a handler has been already registered or not
+
+**Parameters:**
+
+Name | Type |
+------ | ------ |
+`lifecycle` | "before" &#124; "after" |
+`action` | string |
+`handler` | HooksHandler &#124; string |
+
+**Returns:** *boolean*
 
 ___
 
