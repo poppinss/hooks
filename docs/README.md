@@ -4,6 +4,6 @@
 
 ## Index
 
-### External modules
+### Modules
 
 * ["index"](modules/_index_.md)
