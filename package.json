@@ -9,6 +9,14 @@
     "build/index.js"
   ],
   "dependencies": {},
+  "peerDependencies": {
+    "@adonisjs/fold": "6.x.x"
+  },
+  "peerDependenciesMeta": {
+    "@adonisjs/fold": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@adonisjs/fold": "^6.3.1",
     "@adonisjs/mrm-preset": "^2.3.0",
