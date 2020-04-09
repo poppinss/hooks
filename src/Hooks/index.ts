@@ -32,15 +32,21 @@ export class Hooks {
   }
 
   /**
+   * Raise exceptins when resolver is not defined
+   */
+  private ensureResolver () {
+    if (!this.resolver) {
+      throw new Error('IoC container resolver is required to register string based hooks handlers')
+    }
+  }
+
+  /**
    * Resolves the hook handler using the resolver when it is defined as string
    * or returns the function reference back
    */
   private resolveHandler (handler: HooksHandler | string): HooksHandler | IocResolverLookupNode {
-    if (typeof (handler) === 'string' && !this.resolver) {
-      throw new Error('Cannot register string based hooks handlers without ioc resolver')
-    }
-
     if (typeof (handler) === 'string') {
+      this.ensureResolver()
       return this.resolver!.resolve(handler)
     }
 

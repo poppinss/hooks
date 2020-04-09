@@ -179,7 +179,7 @@ test.group('Hooks | Ioc Resolver', () => {
     const hooks = new Hooks()
 
     const fn = () => hooks.add('before', 'save', 'User.beforeSave')
-    assert.throw(fn, 'Cannot register string based hooks handlers without ioc resolver')
+    assert.throw(fn, 'IoC container resolver is required to register string based hooks handlers')
   })
 
   test('register ioc container references as hooks', async (assert) => {
