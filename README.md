@@ -21,6 +21,7 @@ I find myself re-writing the code for hooks in multiple packages, so decided to 
     - [exec(lifecycle: 'before' | 'after', action: string, ...data: any[])](#execlifecycle-before--after-action-string-data-any)
     - [remove (lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string)](#remove-lifecycle-before--after-action-string-handler-hookshandler--string)
     - [clear(lifecycle: 'before' | 'after', action?: string)](#clearlifecycle-before--after-action-string)
+    - [merge (hooks: Hooks): void](#merge-hooks-hooks-void)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -114,6 +115,19 @@ hooks.clear('before')
 
 // Clear just for the save action
 hooks.clear('before', 'save')
+```
+
+#### merge (hooks: Hooks): void
+Merge hooks from an existing hooks instance. Useful during class inheritance.
+
+```ts
+const hooks = new Hooks()
+hooks.add('before', 'save', function () {})
+
+const hooks1 = new Hooks()
+hooks1.merge(hooks)
+
+await hooks1.exec('before', 'save', [])
 ```
 
 [circleci-image]: https://img.shields.io/circleci/project/github/poppinss/hooks/master.svg?style=for-the-badge&logo=circleci
