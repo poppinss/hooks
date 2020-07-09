@@ -172,6 +172,45 @@ test.group('Hooks', () => {
 		hooks.add('before', 'save', beforeSave)
 		assert.isTrue(hooks.has('before', 'save', beforeSave))
 	})
+
+	test('merge hooks from one hooks instance', (assert) => {
+		const hooks = new Hooks()
+
+		function beforeSave() {}
+		hooks.add('before', 'save', beforeSave)
+
+		const hooks1 = new Hooks()
+		hooks1.merge(hooks)
+
+		assert.deepEqual(hooks1['hooks'].before, new Map([['save', new Set([beforeSave])]]))
+		assert.deepEqual(hooks1['hooks'].after, new Map())
+	})
+
+	test('merge hooks over existing hooks', (assert) => {
+		const hooks = new Hooks()
+
+		function beforeSave() {}
+		hooks.add('before', 'save', beforeSave)
+
+		const hooks1 = new Hooks()
+
+		function beforeCreate() {}
+		hooks1.add('before', 'create', beforeCreate)
+		hooks1.merge(hooks)
+
+		assert.deepEqual(
+			hooks1['hooks'].before,
+			new Map([
+				['save', new Set([beforeSave])],
+				['create', new Set([beforeCreate])],
+			])
+		)
+
+		assert.deepEqual(hooks['hooks'].before, new Map([['save', new Set([beforeSave])]]))
+
+		assert.deepEqual(hooks1['hooks'].after, new Map())
+		assert.deepEqual(hooks['hooks'].after, new Map())
+	})
 })
 
 test.group('Hooks | Ioc Resolver', () => {
@@ -275,5 +314,55 @@ test.group('Hooks | Ioc Resolver', () => {
 
 		hooks.add('before', 'save', 'User.save')
 		assert.isTrue(hooks.has('before', 'save', 'User.save'))
+	})
+
+	test('merge hooks from one hooks instance', async (assert) => {
+		const stack: string[] = []
+
+		const ioc = new Ioc()
+		ioc.bind('User', () => {
+			return {
+				save() {
+					stack.push(String(stack.length + 1))
+				},
+			}
+		})
+
+		const hooks = new Hooks(ioc.getResolver())
+		hooks.add('before', 'save', 'User.save')
+
+		const hooks1 = new Hooks(ioc.getResolver())
+		hooks1.merge(hooks)
+
+		await hooks1.exec('before', 'save', 'foo')
+		await hooks.exec('before', 'save', 'foo')
+		assert.deepEqual(stack, ['1', '2'])
+	})
+
+	test('merge hooks over existing hooks', async (assert) => {
+		const stack: string[] = []
+
+		const ioc = new Ioc()
+		ioc.bind('User', () => {
+			return {
+				save() {
+					stack.push(String(stack.length + 1))
+				},
+			}
+		})
+
+		const hooks = new Hooks(ioc.getResolver())
+		hooks.add('before', 'save', 'User.save')
+
+		const hooks1 = new Hooks(ioc.getResolver())
+		hooks1.add('before', 'create', 'User.save')
+		hooks1.merge(hooks)
+
+		await hooks1.exec('before', 'save', 'foo')
+		await hooks1.exec('before', 'create', 'foo')
+
+		await hooks.exec('before', 'save', 'foo')
+		await hooks.exec('before', 'create', 'foo')
+		assert.deepEqual(stack, ['1', '2', '3'])
 	})
 })

@@ -53,6 +53,23 @@ export class Hooks {
 	}
 
 	/**
+	 * Adds the resolved handler to the actions set
+	 */
+	private addResolvedHandler(
+		lifecycle: 'before' | 'after',
+		action: string,
+		handler: HooksHandler | IocResolverLookupNode
+	) {
+		const handlers = this.hooks[lifecycle].get(action)
+
+		if (handlers) {
+			handlers.add(handler)
+		} else {
+			this.hooks[lifecycle].set(action, new Set([handler]))
+		}
+	}
+
+	/**
 	 * Returns a boolean whether a handler has been already registered or not
 	 */
 	public has(lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string): boolean {
@@ -69,15 +86,7 @@ export class Hooks {
 	 * Register hook handler for a given event and lifecycle
 	 */
 	public add(lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string): this {
-		const handlers = this.hooks[lifecycle].get(action)
-		const resolvedHandler = this.resolveHandler(handler)
-
-		if (handlers) {
-			handlers.add(resolvedHandler)
-		} else {
-			this.hooks[lifecycle].set(action, new Set([resolvedHandler]))
-		}
-
+		this.addResolvedHandler(lifecycle, action, this.resolveHandler(handler))
 		return this
 	}
 
@@ -107,6 +116,24 @@ export class Hooks {
 	}
 
 	/**
+	 * Merges hooks of a given hook instance. To merge from more than
+	 * one instance, you can call the merge method for multiple times
+	 */
+	public merge(hooks: Hooks) {
+		hooks.hooks.before.forEach((actionHooks, action) => {
+			actionHooks.forEach((handler) => {
+				this.addResolvedHandler('before', action, handler)
+			})
+		})
+
+		hooks.hooks.after.forEach((actionHooks, action) => {
+			actionHooks.forEach((handler) => {
+				this.addResolvedHandler('after', action, handler)
+			})
+		})
+	}
+
+	/**
 	 * Executes the hook handler for a given action and lifecycle
 	 */
 	public async exec(lifecycle: 'before' | 'after', action: string, ...data: any[]): Promise<void> {
@@ -119,6 +146,7 @@ export class Hooks {
 			if (typeof handler === 'function') {
 				await handler(...data)
 			} else {
+				this.ensureResolver()
 				await this.resolver!.call(handler, undefined, data)
 			}
 		}
