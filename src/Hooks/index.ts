@@ -72,14 +72,17 @@ export class Hooks {
 	/**
 	 * Returns a boolean whether a handler has been already registered or not
 	 */
-	public has(lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string): boolean {
+	public has(
+		lifecycle: 'before' | 'after',
+		action: string,
+		handler: HooksHandler | string
+	): boolean {
 		const handlers = this.hooks[lifecycle].get(action)
-		const resolvedHandler = this.resolveHandler(handler)
 		if (!handlers) {
 			return false
 		}
 
-		return handlers.has(resolvedHandler)
+		return handlers.has(this.resolveHandler(handler))
 	}
 
 	/**
@@ -93,14 +96,17 @@ export class Hooks {
 	/**
 	 * Remove a pre-registered handler
 	 */
-	public remove(lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string): void {
+	public remove(
+		lifecycle: 'before' | 'after',
+		action: string,
+		handler: HooksHandler | string
+	): void {
 		const handlers = this.hooks[lifecycle].get(action)
 		if (!handlers) {
 			return
 		}
 
-		const resolvedHandler = this.resolveHandler(handler)
-		handlers.delete(resolvedHandler)
+		handlers.delete(this.resolveHandler(handler))
 	}
 
 	/**
