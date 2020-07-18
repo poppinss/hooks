@@ -4,10 +4,9 @@ poppinss_iftxlt.jpg" width="600px"></div>
 # Hooks
 > A no brainer module to execute lifecycle hooks in sequence.
 
-[![circleci-image]][circleci-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url]
+[![circleci-image]][circleci-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url] [![audit-report-image]][audit-report-url]
 
 I find myself re-writing the code for hooks in multiple packages, so decided to extract it to it's own module, that can be re-used by other modules of AdonisJS.
-
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -26,7 +25,7 @@ I find myself re-writing the code for hooks in multiple packages, so decided to 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## How it works?
-The hooks class exposes the API to `register`, `remove` and `exec` lifecycle hooks for any number of actions or events. The class API is meant to be used internally and not by the user facing code, so that you can improve the autocomplete UX.
+The hooks class exposes the API to `register`, `remove` and `exec` lifecycle hooks for any number of actions or events. The class API is meant to be used internally and not by the user facing code and this gives you the chance to improve the hooks DX.
 
 For example: The Lucid models uses this class internally and expose `before` and `after` methods on the model itself. Doing this, Lucid can control the autocomplete, type checking for the `before` and `after` methods itself, without relying on this package to expose the generics API.
 
@@ -56,7 +55,7 @@ hooks.add('before', 'save', function () {
 await hooks.exec('before', 'save', { id: 1 })
 ```
 
-If you want the end user to define IoC container bindings as the hook handler, then you need to pass the `Ioc` container resolver to the Hooks constructor. Following is the snippet from Lucid models.
+If you want the end user to define IoC container bindings as the hook handler, then you need to pass the `IoC` container resolver to the Hooks constructor. Following is the snippet from Lucid models.
 
 ```ts
 import { Ioc } from '@adonisjs/fold'
@@ -141,3 +140,6 @@ await hooks1.exec('before', 'save', [])
 
 [license-image]: https://img.shields.io/npm/l/@poppinss/hooks?color=blueviolet&style=for-the-badge
 [license-url]: LICENSE.md "license"
+
+[audit-report-image]: https://img.shields.io/badge/-Audit%20Report-blueviolet?style=for-the-badge
+[audit-report-url]: https://htmlpreview.github.io/?https://github.com/poppinss/hooks/blob/develop/npm-audit.html "audit-report"
