@@ -53,6 +53,13 @@ export class Hooks {
 	}
 
 	/**
+	 * Returns handlers set for a given action or undefined
+	 */
+	private getActionHandlers(lifecycle: 'before' | 'after', action: string) {
+		return this.hooks[lifecycle].get(action)
+	}
+
+	/**
 	 * Adds the resolved handler to the actions set
 	 */
 	private addResolvedHandler(
@@ -60,7 +67,7 @@ export class Hooks {
 		action: string,
 		handler: HooksHandler | IocResolverLookupNode
 	) {
-		const handlers = this.hooks[lifecycle].get(action)
+		const handlers = this.getActionHandlers(lifecycle, action)
 
 		if (handlers) {
 			handlers.add(handler)
@@ -77,7 +84,7 @@ export class Hooks {
 		action: string,
 		handler: HooksHandler | string
 	): boolean {
-		const handlers = this.hooks[lifecycle].get(action)
+		const handlers = this.getActionHandlers(lifecycle, action)
 		if (!handlers) {
 			return false
 		}
@@ -101,7 +108,7 @@ export class Hooks {
 		action: string,
 		handler: HooksHandler | string
 	): void {
-		const handlers = this.hooks[lifecycle].get(action)
+		const handlers = this.getActionHandlers(lifecycle, action)
 		if (!handlers) {
 			return
 		}
@@ -110,7 +117,8 @@ export class Hooks {
 	}
 
 	/**
-	 * Remove a pre-registered handler
+	 * Remove all handlers for a given action or lifecycle. If action is not
+	 * defined, then all actions for that given lifecycle are removed
 	 */
 	public clear(lifecycle: 'before' | 'after', action?: string): void {
 		if (!action) {
@@ -143,7 +151,7 @@ export class Hooks {
 	 * Executes the hook handler for a given action and lifecycle
 	 */
 	public async exec(lifecycle: 'before' | 'after', action: string, ...data: any[]): Promise<void> {
-		const handlers = this.hooks[lifecycle].get(action)
+		const handlers = this.getActionHandlers(lifecycle, action)
 		if (!handlers) {
 			return
 		}
@@ -152,7 +160,6 @@ export class Hooks {
 			if (typeof handler === 'function') {
 				await handler(...data)
 			} else {
-				this.ensureResolver()
 				await this.resolver!.call(handler, undefined, data)
 			}
 		}
