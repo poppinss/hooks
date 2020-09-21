@@ -2,6 +2,7 @@
 poppinss_iftxlt.jpg" width="600px"></div>
 
 # Hooks
+
 > A no brainer module to execute lifecycle hooks in sequence.
 
 [![circleci-image]][circleci-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url] [![audit-report-image]][audit-report-url]
@@ -25,6 +26,7 @@ I find myself re-writing the code for hooks in multiple packages, so decided to 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## How it works?
+
 The hooks class exposes the API to `register`, `remove` and `exec` lifecycle hooks for any number of actions or events. The class API is meant to be used internally and not by the user facing code and this gives you the chance to improve the hooks DX.
 
 For example: The Lucid models uses this class internally and expose `before` and `after` methods on the model itself. Doing this, Lucid can control the autocomplete, type checking for the `before` and `after` methods itself, without relying on this package to expose the generics API.
@@ -32,6 +34,7 @@ For example: The Lucid models uses this class internally and expose `before` and
 > Also generics increases the number of types Typescript has to generate and it's better to avoid them whenever possible.
 
 ## Installation
+
 Install the package from npm registry as follows:
 
 ```sh
@@ -42,14 +45,14 @@ yarn add @poppinss/hooks
 ```
 
 ## Usage
+
 Use it as follows
 
 ```ts
 import { Hooks } from '@poppinss/hooks'
 const hooks = new Hooks()
 
-hooks.add('before', 'save', function () {
-})
+hooks.add('before', 'save', function () {})
 
 // Later invoke before save hooks
 await hooks.exec('before', 'save', { id: 1 })
@@ -83,7 +86,6 @@ hooks.add('before', 'save', (data) => {
 })
 ```
 
-
 #### exec(lifecycle: 'before' | 'after', action: string, ...data: any[])
 
 Execute a given hook for a selected lifecycle.
@@ -97,7 +99,7 @@ hooks.exec('before', 'save', { username: 'virk' })
 Remove an earlier registered hook. If you are using the IoC container bindings, then passing the binding string is enough, otherwise you need to store the reference of the function.
 
 ```ts
-function onSave () {}
+function onSave() {}
 
 hooks.add('before', 'save', onSave)
 
@@ -117,6 +119,7 @@ hooks.clear('before', 'save')
 ```
 
 #### merge (hooks: Hooks): void
+
 Merge hooks from an existing hooks instance. Useful during class inheritance.
 
 ```ts
@@ -130,16 +133,12 @@ await hooks1.exec('before', 'save', [])
 ```
 
 [circleci-image]: https://img.shields.io/circleci/project/github/poppinss/hooks/master.svg?style=for-the-badge&logo=circleci
-[circleci-url]: https://circleci.com/gh/poppinss/hooks "circleci"
-
+[circleci-url]: https://circleci.com/gh/poppinss/hooks 'circleci'
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
-[typescript-url]:  "typescript"
-
+[typescript-url]: "typescript"
 [npm-image]: https://img.shields.io/npm/v/@poppinss/hooks.svg?style=for-the-badge&logo=npm
-[npm-url]: https://npmjs.org/package/@poppinss/hooks "npm"
-
+[npm-url]: https://npmjs.org/package/@poppinss/hooks 'npm'
 [license-image]: https://img.shields.io/npm/l/@poppinss/hooks?color=blueviolet&style=for-the-badge
-[license-url]: LICENSE.md "license"
-
+[license-url]: LICENSE.md 'license'
 [audit-report-image]: https://img.shields.io/badge/-Audit%20Report-blueviolet?style=for-the-badge
-[audit-report-url]: https://htmlpreview.github.io/?https://github.com/poppinss/hooks/blob/develop/npm-audit.html "audit-report"
+[audit-report-url]: https://htmlpreview.github.io/?https://github.com/poppinss/hooks/blob/develop/npm-audit.html 'audit-report'
