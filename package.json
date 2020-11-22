@@ -32,7 +32,7 @@
 		}
 	},
 	"devDependencies": {
-		"@adonisjs/fold": "7.0.8",
+		"@adonisjs/fold": "^7.0.8",
 		"@adonisjs/mrm-preset": "^2.4.0",
 		"@adonisjs/require-ts": "^1.0.0",
 		"@types/node": "^14.11.1",
