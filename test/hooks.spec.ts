@@ -8,7 +8,7 @@
  */
 
 import test from 'japa'
-import { Ioc } from '@adonisjs/fold'
+import { Application } from '@adonisjs/application'
 import { Hooks } from '../src/Hooks'
 
 test.group('Hooks', () => {
@@ -223,9 +223,9 @@ test.group('Hooks | Ioc Resolver', () => {
 
 	test('register ioc container references as hooks', async (assert) => {
 		const stack: string[] = []
+		const app = new Application(__dirname, 'web', {})
 
-		const ioc = new Ioc()
-		ioc.bind('User', () => {
+		app.container.bind('User', () => {
 			return {
 				save() {
 					stack.push(String(stack.length + 1))
@@ -233,7 +233,7 @@ test.group('Hooks | Ioc Resolver', () => {
 			}
 		})
 
-		const hooks = new Hooks(ioc.getResolver())
+		const hooks = new Hooks(app.container.getResolver())
 
 		hooks.add('before', 'save', 'User.save')
 		await hooks.exec('before', 'save', 'foo')
@@ -243,8 +243,8 @@ test.group('Hooks | Ioc Resolver', () => {
 	test('pass one or more arguments to the hook handler', async (assert) => {
 		const stack: string[] = []
 
-		const ioc = new Ioc()
-		ioc.bind('User', () => {
+		const app = new Application(__dirname, 'web', {})
+		app.container.bind('User', () => {
 			return {
 				save(arg1, arg2) {
 					stack.push(arg1)
@@ -253,7 +253,7 @@ test.group('Hooks | Ioc Resolver', () => {
 			}
 		})
 
-		const hooks = new Hooks(ioc.getResolver())
+		const hooks = new Hooks(app.container.getResolver())
 		hooks.add('before', 'save', 'User.save')
 
 		await hooks.exec('before', 'save', 'foo', 'bar')
@@ -263,8 +263,8 @@ test.group('Hooks | Ioc Resolver', () => {
 	test('pass array to hook handler', async (assert) => {
 		let stack: string[] = []
 
-		const ioc = new Ioc()
-		ioc.bind('User', () => {
+		const app = new Application(__dirname, 'web', {})
+		app.container.bind('User', () => {
 			return {
 				save(arg1) {
 					stack = stack.concat(arg1)
@@ -272,7 +272,7 @@ test.group('Hooks | Ioc Resolver', () => {
 			}
 		})
 
-		const hooks = new Hooks(ioc.getResolver())
+		const hooks = new Hooks(app.container.getResolver())
 		hooks.add('before', 'save', 'User.save')
 
 		await hooks.exec('before', 'save', ['foo', 'bar'])
@@ -281,8 +281,9 @@ test.group('Hooks | Ioc Resolver', () => {
 
 	test('remove hook handler by reference', async (assert) => {
 		let stack: string[] = []
-		const ioc = new Ioc()
-		ioc.bind('User', () => {
+		const app = new Application(__dirname, 'web', {})
+
+		app.container.bind('User', () => {
 			return {
 				save(arg1) {
 					stack = stack.concat(arg1)
@@ -290,7 +291,7 @@ test.group('Hooks | Ioc Resolver', () => {
 			}
 		})
 
-		const hooks = new Hooks(ioc.getResolver())
+		const hooks = new Hooks(app.container.getResolver())
 		hooks.add('before', 'save', 'User.save')
 		hooks.remove('before', 'save', 'User.save')
 
@@ -301,8 +302,8 @@ test.group('Hooks | Ioc Resolver', () => {
 	test('find if ioc container reference hook already exists', async (assert) => {
 		const stack: string[] = []
 
-		const ioc = new Ioc()
-		ioc.bind('User', () => {
+		const app = new Application(__dirname, 'web', {})
+		app.container.bind('User', () => {
 			return {
 				save() {
 					stack.push(String(stack.length + 1))
@@ -310,7 +311,7 @@ test.group('Hooks | Ioc Resolver', () => {
 			}
 		})
 
-		const hooks = new Hooks(ioc.getResolver())
+		const hooks = new Hooks(app.container.getResolver())
 
 		hooks.add('before', 'save', 'User.save')
 		assert.isTrue(hooks.has('before', 'save', 'User.save'))
@@ -319,8 +320,8 @@ test.group('Hooks | Ioc Resolver', () => {
 	test('merge hooks from one hooks instance', async (assert) => {
 		const stack: string[] = []
 
-		const ioc = new Ioc()
-		ioc.bind('User', () => {
+		const app = new Application(__dirname, 'web', {})
+		app.container.bind('User', () => {
 			return {
 				save() {
 					stack.push(String(stack.length + 1))
@@ -328,10 +329,10 @@ test.group('Hooks | Ioc Resolver', () => {
 			}
 		})
 
-		const hooks = new Hooks(ioc.getResolver())
+		const hooks = new Hooks(app.container.getResolver())
 		hooks.add('before', 'save', 'User.save')
 
-		const hooks1 = new Hooks(ioc.getResolver())
+		const hooks1 = new Hooks(app.container.getResolver())
 		hooks1.merge(hooks)
 
 		await hooks1.exec('before', 'save', 'foo')
@@ -342,8 +343,8 @@ test.group('Hooks | Ioc Resolver', () => {
 	test('merge hooks over existing hooks', async (assert) => {
 		const stack: string[] = []
 
-		const ioc = new Ioc()
-		ioc.bind('User', () => {
+		const app = new Application(__dirname, 'web', {})
+		app.container.bind('User', () => {
 			return {
 				save() {
 					stack.push(String(stack.length + 1))
@@ -351,10 +352,10 @@ test.group('Hooks | Ioc Resolver', () => {
 			}
 		})
 
-		const hooks = new Hooks(ioc.getResolver())
+		const hooks = new Hooks(app.container.getResolver())
 		hooks.add('before', 'save', 'User.save')
 
-		const hooks1 = new Hooks(ioc.getResolver())
+		const hooks1 = new Hooks(app.container.getResolver())
 		hooks1.add('before', 'create', 'User.save')
 		hooks1.merge(hooks)
 

@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import { IocResolverContract, IocResolverLookupNode } from '@adonisjs/fold'
+import { ApplicationContract, IocResolverLookupNode } from '@ioc:Adonis/Core/Application'
 
 type HooksHandler = (...args: any[]) => void | Promise<void>
 
@@ -21,14 +21,14 @@ type HooksHandler = (...args: any[]) => void | Promise<void>
  */
 export class Hooks {
 	private hooks: {
-		before: Map<string, Set<HooksHandler | IocResolverLookupNode>>
-		after: Map<string, Set<HooksHandler | IocResolverLookupNode>>
+		before: Map<string, Set<HooksHandler | IocResolverLookupNode<any>>>
+		after: Map<string, Set<HooksHandler | IocResolverLookupNode<any>>>
 	} = {
 		before: new Map(),
 		after: new Map(),
 	}
 
-	constructor(private resolver?: IocResolverContract) {}
+	constructor(private resolver?: ReturnType<ApplicationContract['container']['getResolver']>) {}
 
 	/**
 	 * Raise exceptins when resolver is not defined
@@ -43,7 +43,9 @@ export class Hooks {
 	 * Resolves the hook handler using the resolver when it is defined as string
 	 * or returns the function reference back
 	 */
-	private resolveHandler(handler: HooksHandler | string): HooksHandler | IocResolverLookupNode {
+	private resolveHandler(
+		handler: HooksHandler | string
+	): HooksHandler | IocResolverLookupNode<any> {
 		if (typeof handler === 'string') {
 			this.ensureResolver()
 			return this.resolver!.resolve(handler)
@@ -65,7 +67,7 @@ export class Hooks {
 	private addResolvedHandler(
 		lifecycle: 'before' | 'after',
 		action: string,
-		handler: HooksHandler | IocResolverLookupNode
+		handler: HooksHandler | IocResolverLookupNode<any>
 	) {
 		const handlers = this.getActionHandlers(lifecycle, action)
 
