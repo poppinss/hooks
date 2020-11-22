@@ -23,9 +23,8 @@
 		"lint": "eslint . --ext=.ts",
 		"sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json poppinss/hooks"
 	},
-	"dependencies": {},
 	"peerDependencies": {
-		"@adonisjs/fold": "^6.0.0"
+		"@adonisjs/fold": "^6.0.0 | ^7.0.0"
 	},
 	"peerDependenciesMeta": {
 		"@adonisjs/fold": {
@@ -33,7 +32,7 @@
 		}
 	},
 	"devDependencies": {
-		"@adonisjs/fold": "^6.4.0",
+		"@adonisjs/fold": "^7.0.8",
 		"@adonisjs/mrm-preset": "^2.4.0",
 		"@adonisjs/require-ts": "^1.0.0",
 		"@types/node": "^14.11.1",
