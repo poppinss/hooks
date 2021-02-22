@@ -88,5 +88,6 @@
 	"np": {
 		"contents": ".",
 		"anyBranch": false
-	}
+	},
+	"dependencies": {}
 }

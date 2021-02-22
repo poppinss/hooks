@@ -4,7 +4,7 @@
 
 > A no brainer module to execute lifecycle hooks in sequence.
 
-[![circleci-image]][circleci-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url] [![audit-report-image]][audit-report-url]
+[![circleci-image]][circleci-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url] [![synk-image]][synk-url]
 
 I find myself re-writing the code for hooks in multiple packages, so decided to extract it to it's own module, that can be re-used by other modules of AdonisJS.
 
@@ -133,11 +133,15 @@ await hooks1.exec('before', 'save', [])
 
 [circleci-image]: https://img.shields.io/circleci/project/github/poppinss/hooks/master.svg?style=for-the-badge&logo=circleci
 [circleci-url]: https://circleci.com/gh/poppinss/hooks 'circleci'
+
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
 [typescript-url]: "typescript"
+
 [npm-image]: https://img.shields.io/npm/v/@poppinss/hooks.svg?style=for-the-badge&logo=npm
 [npm-url]: https://npmjs.org/package/@poppinss/hooks 'npm'
+
 [license-image]: https://img.shields.io/npm/l/@poppinss/hooks?color=blueviolet&style=for-the-badge
 [license-url]: LICENSE.md 'license'
-[audit-report-image]: https://img.shields.io/badge/-Audit%20Report-blueviolet?style=for-the-badge
-[audit-report-url]: https://htmlpreview.github.io/?https://github.com/poppinss/hooks/blob/develop/npm-audit.html 'audit-report'
+
+[synk-image]: https://img.shields.io/snyk/vulnerabilities/github/poppinss/hooks?label=Synk%20Vulnerabilities&style=for-the-badge
+[synk-url]: https://snyk.io/test/github/poppinss/hooks?targetFile=package.json "synk"
