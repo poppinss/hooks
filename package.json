@@ -1,93 +1,93 @@
 {
-	"name": "@poppinss/hooks",
-	"version": "2.0.0",
-	"description": "A no brainer hooks module for execute before/after lifecycle hooks",
-	"main": "build/index.js",
-	"files": [
-		"build/src",
-		"build/index.d.ts",
-		"build/index.js"
-	],
-	"scripts": {
-		"mrm": "mrm --preset=@adonisjs/mrm-preset",
-		"pretest": "npm run lint",
-		"test": "node japaFile.js",
-		"clean": "del build",
-		"compile": "npm run lint && npm run clean && tsc",
-		"build": "npm run compile",
-		"commit": "git-cz",
-		"release": "np",
-		"version": "npm run build",
-		"format": "prettier --write .",
-		"prepublishOnly": "npm run build",
-		"lint": "eslint . --ext=.ts",
-		"sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json poppinss/hooks"
-	},
-	"peerDependencies": {
-		"@adonisjs/application": "^4.0.0"
-	},
-	"peerDependenciesMeta": {
-		"@adonisjs/application": {
-			"optional": true
-		}
-	},
-	"devDependencies": {
-		"@adonisjs/application": "^4.0.2",
-		"@adonisjs/mrm-preset": "^3.0.0",
-		"@adonisjs/require-ts": "^2.0.2",
-		"@types/node": "^14.14.31",
-		"commitizen": "^4.2.3",
-		"cz-conventional-changelog": "^3.3.0",
-		"del-cli": "^3.0.1",
-		"doctoc": "^2.0.0",
-		"eslint": "^7.20.0",
-		"eslint-config-prettier": "^8.0.0",
-		"eslint-plugin-adonis": "^1.2.1",
-		"eslint-plugin-prettier": "^3.3.1",
-		"github-label-sync": "^2.0.0",
-		"husky": "^5.1.0",
-		"japa": "^3.1.1",
-		"mrm": "^2.5.19",
-		"np": "^7.4.0",
-		"prettier": "^2.2.1",
-		"typescript": "^4.1.5"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/poppinss/hooks.git"
-	},
-	"keywords": [
-		"hooks",
-		"poppinss"
-	],
-	"author": "virk,poppinss",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/poppinss/hooks/issues"
-	},
-	"homepage": "https://github.com/poppinss/hooks#readme",
-	"nyc": {
-		"exclude": [
-			"test"
-		],
-		"extension": [
-			".ts"
-		]
-	},
-	"husky": {
-		"hooks": {
-			"pre-commit": "doctoc README.md --title='## Table of contents' && git add README.md",
-			"commit-msg": "node ./node_modules/@adonisjs/mrm-preset/validateCommit/conventional/validate.js"
-		}
-	},
-	"config": {
-		"commitizen": {
-			"path": "cz-conventional-changelog"
-		}
-	},
-	"np": {
-		"contents": ".",
-		"anyBranch": false
-	},
-	"dependencies": {}
+  "name": "@poppinss/hooks",
+  "version": "2.0.0",
+  "description": "A no brainer hooks module for execute before/after lifecycle hooks",
+  "main": "build/index.js",
+  "files": [
+    "build/src",
+    "build/index.d.ts",
+    "build/index.js"
+  ],
+  "scripts": {
+    "mrm": "mrm --preset=@adonisjs/mrm-preset",
+    "pretest": "npm run lint",
+    "test": "node japaFile.js",
+    "clean": "del build",
+    "compile": "npm run lint && npm run clean && tsc",
+    "build": "npm run compile",
+    "commit": "git-cz",
+    "release": "np",
+    "version": "npm run build",
+    "format": "prettier --write .",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint . --ext=.ts",
+    "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json poppinss/hooks"
+  },
+  "peerDependencies": {
+    "@adonisjs/application": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@adonisjs/application": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@adonisjs/application": "^4.0.2",
+    "@adonisjs/mrm-preset": "^3.0.0",
+    "@adonisjs/require-ts": "^2.0.2",
+    "@types/node": "^14.14.31",
+    "commitizen": "^4.2.3",
+    "cz-conventional-changelog": "^3.3.0",
+    "del-cli": "^3.0.1",
+    "doctoc": "^2.0.0",
+    "eslint": "^7.20.0",
+    "eslint-config-prettier": "^8.0.0",
+    "eslint-plugin-adonis": "^1.2.1",
+    "eslint-plugin-prettier": "^3.3.1",
+    "github-label-sync": "^2.0.0",
+    "husky": "^5.1.0",
+    "japa": "^3.1.1",
+    "mrm": "^2.5.19",
+    "np": "^7.4.0",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/poppinss/hooks.git"
+  },
+  "keywords": [
+    "hooks",
+    "poppinss"
+  ],
+  "author": "virk,poppinss",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/poppinss/hooks/issues"
+  },
+  "homepage": "https://github.com/poppinss/hooks#readme",
+  "nyc": {
+    "exclude": [
+      "test"
+    ],
+    "extension": [
+      ".ts"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "doctoc README.md --title='## Table of contents' && git add README.md",
+      "commit-msg": "node ./node_modules/@adonisjs/mrm-preset/validateCommit/conventional/validate.js"
+    }
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "np": {
+    "contents": ".",
+    "anyBranch": false
+  },
+  "dependencies": {}
 }

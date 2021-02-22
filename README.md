@@ -10,17 +10,18 @@ I find myself re-writing the code for hooks in multiple packages, so decided to 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 ## Table of contents
 
 - [How it works?](#how-it-works)
 - [Installation](#installation)
 - [Usage](#usage)
 - [API](#api)
-    - [add(lifecycle: 'before' | 'after', action: string, handler: Function | string)](#addlifecycle-before--after-action-string-handler-function--string)
-    - [exec(lifecycle: 'before' | 'after', action: string, ...data: any[])](#execlifecycle-before--after-action-string-data-any)
-    - [remove (lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string)](#remove-lifecycle-before--after-action-string-handler-hookshandler--string)
-    - [clear(lifecycle: 'before' | 'after', action?: string)](#clearlifecycle-before--after-action-string)
-    - [merge (hooks: Hooks): void](#merge-hooks-hooks-void)
+  - [add(lifecycle: 'before' | 'after', action: string, handler: Function | string)](#addlifecycle-before--after-action-string-handler-function--string)
+  - [exec(lifecycle: 'before' | 'after', action: string, ...data: any[])](#execlifecycle-before--after-action-string-data-any)
+  - [remove (lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string)](#remove-lifecycle-before--after-action-string-handler-hookshandler--string)
+  - [clear(lifecycle: 'before' | 'after', action?: string)](#clearlifecycle-before--after-action-string)
+  - [merge (hooks: Hooks): void](#merge-hooks-hooks-void)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -133,15 +134,11 @@ await hooks1.exec('before', 'save', [])
 
 [circleci-image]: https://img.shields.io/circleci/project/github/poppinss/hooks/master.svg?style=for-the-badge&logo=circleci
 [circleci-url]: https://circleci.com/gh/poppinss/hooks 'circleci'
-
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
 [typescript-url]: "typescript"
-
 [npm-image]: https://img.shields.io/npm/v/@poppinss/hooks.svg?style=for-the-badge&logo=npm
 [npm-url]: https://npmjs.org/package/@poppinss/hooks 'npm'
-
 [license-image]: https://img.shields.io/npm/l/@poppinss/hooks?color=blueviolet&style=for-the-badge
 [license-url]: LICENSE.md 'license'
-
 [synk-image]: https://img.shields.io/snyk/vulnerabilities/github/poppinss/hooks?label=Synk%20Vulnerabilities&style=for-the-badge
-[synk-url]: https://snyk.io/test/github/poppinss/hooks?targetFile=package.json "synk"
+[synk-url]: https://snyk.io/test/github/poppinss/hooks?targetFile=package.json 'synk'
