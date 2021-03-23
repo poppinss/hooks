@@ -24,7 +24,7 @@
     "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json poppinss/hooks"
   },
   "peerDependencies": {
-    "@adonisjs/application": "^4.0.0"
+    "@adonisjs/application": ">=4.0.0"
   },
   "peerDependenciesMeta": {
     "@adonisjs/application": {
