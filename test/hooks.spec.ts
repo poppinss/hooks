@@ -8,20 +8,90 @@
  */
 
 import test from 'japa'
-import { Application } from '@adonisjs/application'
 import { Hooks } from '../src/Hooks'
 
-test.group('Hooks', () => {
-  test('add hooks for a given lifecycle', (assert) => {
+test.group('Manage hooks', () => {
+  test('add hooks for a given action', (assert) => {
     const hooks = new Hooks()
 
     function beforeSave() {}
-    hooks.add('before', 'save', beforeSave)
+    hooks.add('save', beforeSave)
 
-    assert.deepEqual(hooks['hooks'].before.get('save'), new Set([beforeSave]))
+    assert.deepEqual(hooks.all(), new Map([['save', new Set([beforeSave])]]))
+    assert.isTrue(hooks.has('save', beforeSave))
   })
 
-  test('execute added hooks in sequence', async (assert) => {
+  test('remove hook', (assert) => {
+    const hooks = new Hooks()
+
+    function beforeSave() {}
+    hooks.add('save', beforeSave)
+
+    assert.deepEqual(hooks.all(), new Map([['save', new Set([beforeSave])]]))
+    assert.isTrue(hooks.has('save', beforeSave))
+
+    hooks.remove('save', beforeSave)
+
+    assert.isFalse(hooks.has('save', beforeSave))
+    assert.deepEqual(hooks.all(), new Map([['save', new Set()]]))
+  })
+
+  test('remove all hooks', (assert) => {
+    const hooks = new Hooks()
+
+    function beforeSave() {}
+    hooks.add('save', beforeSave)
+
+    assert.deepEqual(hooks.all(), new Map([['save', new Set([beforeSave])]]))
+    assert.isTrue(hooks.has('save', beforeSave))
+
+    hooks.clear('save')
+
+    assert.isFalse(hooks.has('save', beforeSave))
+    assert.deepEqual(hooks.all(), new Map([]))
+
+    hooks.clear()
+    assert.deepEqual(hooks.all(), new Map([]))
+  })
+
+  test('merge hooks from one hooks instance', (assert) => {
+    const hooks = new Hooks()
+
+    function beforeSave() {}
+    hooks.add('save', beforeSave)
+
+    const hooks1 = new Hooks()
+    hooks1.merge(hooks)
+
+    assert.deepEqual(hooks.all(), new Map([['save', new Set([beforeSave])]]))
+    assert.deepEqual(hooks1.all(), new Map([['save', new Set([beforeSave])]]))
+  })
+
+  test('merge hooks over existing hooks', (assert) => {
+    const hooks = new Hooks()
+
+    function beforeSave() {}
+    hooks.add('save', beforeSave)
+
+    const hooks1 = new Hooks()
+
+    function beforeCreate() {}
+    hooks1.add('create', beforeCreate)
+    hooks1.merge(hooks)
+
+    assert.deepEqual(hooks.all(), new Map([['save', new Set([beforeSave])]]))
+    assert.deepEqual(
+      hooks1.all(),
+      new Map([
+        ['create', new Set([beforeCreate])],
+        ['save', new Set([beforeSave])],
+      ])
+    )
+  })
+})
+
+test.group('Run hooks', () => {
+  test('run added hooks in sequence', async (assert) => {
     const stack: string[] = []
     const hooks = new Hooks()
 
@@ -36,10 +106,29 @@ test.group('Hooks', () => {
       stack.push('two')
     }
 
-    hooks.add('before', 'save', beforeSave)
-    hooks.add('before', 'save', beforeSaveOne)
+    hooks.add('save', beforeSave)
+    hooks.add('save', beforeSaveOne)
 
-    await hooks.exec('before', 'save', 'foo')
+    await hooks.runner('save').run()
+    assert.deepEqual(stack, ['one', 'two'])
+  })
+
+  test('run anonymous functions as hooks', async (assert) => {
+    const stack: string[] = []
+    const hooks = new Hooks()
+
+    hooks.add('save', () => {
+      return new Promise((resolve) => {
+        stack.push('one')
+        setTimeout(resolve, 100)
+      })
+    })
+
+    hooks.add('save', () => {
+      stack.push('two')
+    })
+
+    await hooks.runner('save').run()
     assert.deepEqual(stack, ['one', 'two'])
   })
 
@@ -60,10 +149,10 @@ test.group('Hooks', () => {
       stack.push(arg2)
     }
 
-    hooks.add('before', 'save', beforeSave)
-    hooks.add('before', 'save', beforeSaveOne)
+    hooks.add('save', beforeSave)
+    hooks.add('save', beforeSaveOne)
 
-    await hooks.exec('before', 'save', 'foo', 'bar')
+    await hooks.runner('save').run('foo', 'bar')
     assert.deepEqual(stack, ['foo', 'bar', 'foo', 'bar'])
   })
 
@@ -82,83 +171,14 @@ test.group('Hooks', () => {
       stack = stack.concat(arg1)
     }
 
-    hooks.add('before', 'save', beforeSave)
-    hooks.add('before', 'save', beforeSaveOne)
+    hooks.add('save', beforeSave)
+    hooks.add('save', beforeSaveOne)
 
-    await hooks.exec('before', 'save', ['foo', 'bar'])
+    await hooks.runner('save').run(['foo', 'bar'])
     assert.deepEqual(stack, ['foo', 'bar', 'foo', 'bar'])
   })
 
-  test('remove hook handler by reference', async (assert) => {
-    let stack: string[] = []
-    const hooks = new Hooks()
-
-    function beforeSave(arg1): Promise<void> {
-      return new Promise((resolve) => {
-        stack = stack.concat(arg1)
-        setTimeout(resolve, 100)
-      })
-    }
-
-    function beforeSaveOne(arg1) {
-      stack = stack.concat(arg1)
-    }
-
-    hooks.add('before', 'save', beforeSave)
-    hooks.add('before', 'save', beforeSaveOne)
-    hooks.remove('before', 'save', beforeSaveOne)
-
-    await hooks.exec('before', 'save', ['foo', 'bar'])
-    assert.deepEqual(stack, ['foo', 'bar'])
-  })
-
-  test('clear all hooks for a given action', async (assert) => {
-    let stack: string[] = []
-    const hooks = new Hooks()
-
-    function beforeSave(arg1): Promise<void> {
-      return new Promise((resolve) => {
-        stack = stack.concat(arg1)
-        setTimeout(resolve, 100)
-      })
-    }
-
-    function beforeSaveOne(arg1) {
-      stack = stack.concat(arg1)
-    }
-
-    hooks.add('before', 'save', beforeSave)
-    hooks.add('before', 'save', beforeSaveOne)
-    hooks.clear('before', 'save')
-
-    await hooks.exec('before', 'save', ['foo', 'bar'])
-    assert.deepEqual(stack, [])
-  })
-
-  test('clear all hooks for a given event', async (assert) => {
-    let stack: string[] = []
-    const hooks = new Hooks()
-
-    function beforeSave(arg1): Promise<void> {
-      return new Promise((resolve) => {
-        stack = stack.concat(arg1)
-        setTimeout(resolve, 100)
-      })
-    }
-
-    function beforeSaveOne(arg1) {
-      stack = stack.concat(arg1)
-    }
-
-    hooks.add('before', 'save', beforeSave)
-    hooks.add('before', 'save', beforeSaveOne)
-    hooks.clear('before')
-
-    await hooks.exec('before', 'save', ['foo', 'bar'])
-    assert.deepEqual(stack, [])
-  })
-
-  test('find if a hook already exists', async (assert) => {
+  test('run without specific hooks', async (assert) => {
     const stack: string[] = []
     const hooks = new Hooks()
 
@@ -169,201 +189,66 @@ test.group('Hooks', () => {
       })
     }
 
-    hooks.add('before', 'save', beforeSave)
-    assert.isTrue(hooks.has('before', 'save', beforeSave))
+    function beforeSaveOne() {
+      stack.push('two')
+    }
+
+    hooks.add('save', beforeSave)
+    hooks.add('save', beforeSaveOne)
+
+    await hooks.runner('save', ['beforeSaveOne']).run()
+    assert.deepEqual(stack, ['one'])
   })
 
-  test('merge hooks from one hooks instance', (assert) => {
+  test('run cleanup functions', async (assert) => {
+    const stack: string[] = []
     const hooks = new Hooks()
 
-    function beforeSave() {}
-    hooks.add('before', 'save', beforeSave)
+    hooks.add('save', () => {
+      stack.push('one')
+      return () => {
+        stack.push('three')
+      }
+    })
 
-    const hooks1 = new Hooks()
-    hooks1.merge(hooks)
+    hooks.add('save', () => {
+      stack.push('two')
+      return () => {
+        stack.push('four')
+      }
+    })
 
-    assert.deepEqual(hooks1['hooks'].before, new Map([['save', new Set([beforeSave])]]))
-    assert.deepEqual(hooks1['hooks'].after, new Map())
+    const runner = hooks.runner('save')
+    await runner.run()
+    await runner.cleanup()
+    assert.deepEqual(stack, ['one', 'two', 'three', 'four'])
   })
 
-  test('merge hooks over existing hooks', (assert) => {
+  test('run cleanup functions even when there is a failure', async (assert) => {
+    assert.plan(2)
+
+    const stack: string[] = []
     const hooks = new Hooks()
 
-    function beforeSave() {}
-    hooks.add('before', 'save', beforeSave)
-
-    const hooks1 = new Hooks()
-
-    function beforeCreate() {}
-    hooks1.add('before', 'create', beforeCreate)
-    hooks1.merge(hooks)
-
-    assert.deepEqual(
-      hooks1['hooks'].before,
-      new Map([
-        ['save', new Set([beforeSave])],
-        ['create', new Set([beforeCreate])],
-      ])
-    )
-
-    assert.deepEqual(hooks['hooks'].before, new Map([['save', new Set([beforeSave])]]))
-
-    assert.deepEqual(hooks1['hooks'].after, new Map())
-    assert.deepEqual(hooks['hooks'].after, new Map())
-  })
-})
-
-test.group('Hooks | Ioc Resolver', () => {
-  test('raise error when passing string as a reference with ioc resolver', (assert) => {
-    const hooks = new Hooks()
-
-    const fn = () => hooks.add('before', 'save', 'User.beforeSave')
-    assert.throw(fn, 'IoC container resolver is required to register string based hooks handlers')
-  })
-
-  test('register ioc container references as hooks', async (assert) => {
-    const stack: string[] = []
-    const app = new Application(__dirname, 'web', {})
-
-    app.container.bind('User', () => {
-      return {
-        save() {
-          stack.push(String(stack.length + 1))
-        },
+    hooks.add('save', () => {
+      stack.push('one')
+      return () => {
+        stack.push('three')
       }
     })
 
-    const hooks = new Hooks(app.container.getResolver())
-
-    hooks.add('before', 'save', 'User.save')
-    await hooks.exec('before', 'save', 'foo')
-    assert.deepEqual(stack, ['1'])
-  })
-
-  test('pass one or more arguments to the hook handler', async (assert) => {
-    const stack: string[] = []
-
-    const app = new Application(__dirname, 'web', {})
-    app.container.bind('User', () => {
-      return {
-        save(arg1, arg2) {
-          stack.push(arg1)
-          stack.push(arg2)
-        },
-      }
+    hooks.add('save', () => {
+      throw new Error('boom')
     })
 
-    const hooks = new Hooks(app.container.getResolver())
-    hooks.add('before', 'save', 'User.save')
+    const runner = hooks.runner('save')
+    try {
+      await runner.run()
+    } catch (error) {
+      assert.equal(error.message, 'boom')
+    }
 
-    await hooks.exec('before', 'save', 'foo', 'bar')
-    assert.deepEqual(stack, ['foo', 'bar'])
-  })
-
-  test('pass array to hook handler', async (assert) => {
-    let stack: string[] = []
-
-    const app = new Application(__dirname, 'web', {})
-    app.container.bind('User', () => {
-      return {
-        save(arg1) {
-          stack = stack.concat(arg1)
-        },
-      }
-    })
-
-    const hooks = new Hooks(app.container.getResolver())
-    hooks.add('before', 'save', 'User.save')
-
-    await hooks.exec('before', 'save', ['foo', 'bar'])
-    assert.deepEqual(stack, ['foo', 'bar'])
-  })
-
-  test('remove hook handler by reference', async (assert) => {
-    let stack: string[] = []
-    const app = new Application(__dirname, 'web', {})
-
-    app.container.bind('User', () => {
-      return {
-        save(arg1) {
-          stack = stack.concat(arg1)
-        },
-      }
-    })
-
-    const hooks = new Hooks(app.container.getResolver())
-    hooks.add('before', 'save', 'User.save')
-    hooks.remove('before', 'save', 'User.save')
-
-    await hooks.exec('before', 'save', ['foo', 'bar'])
-    assert.deepEqual(stack, [])
-  })
-
-  test('find if ioc container reference hook already exists', async (assert) => {
-    const stack: string[] = []
-
-    const app = new Application(__dirname, 'web', {})
-    app.container.bind('User', () => {
-      return {
-        save() {
-          stack.push(String(stack.length + 1))
-        },
-      }
-    })
-
-    const hooks = new Hooks(app.container.getResolver())
-
-    hooks.add('before', 'save', 'User.save')
-    assert.isTrue(hooks.has('before', 'save', 'User.save'))
-  })
-
-  test('merge hooks from one hooks instance', async (assert) => {
-    const stack: string[] = []
-
-    const app = new Application(__dirname, 'web', {})
-    app.container.bind('User', () => {
-      return {
-        save() {
-          stack.push(String(stack.length + 1))
-        },
-      }
-    })
-
-    const hooks = new Hooks(app.container.getResolver())
-    hooks.add('before', 'save', 'User.save')
-
-    const hooks1 = new Hooks(app.container.getResolver())
-    hooks1.merge(hooks)
-
-    await hooks1.exec('before', 'save', 'foo')
-    await hooks.exec('before', 'save', 'foo')
-    assert.deepEqual(stack, ['1', '2'])
-  })
-
-  test('merge hooks over existing hooks', async (assert) => {
-    const stack: string[] = []
-
-    const app = new Application(__dirname, 'web', {})
-    app.container.bind('User', () => {
-      return {
-        save() {
-          stack.push(String(stack.length + 1))
-        },
-      }
-    })
-
-    const hooks = new Hooks(app.container.getResolver())
-    hooks.add('before', 'save', 'User.save')
-
-    const hooks1 = new Hooks(app.container.getResolver())
-    hooks1.add('before', 'create', 'User.save')
-    hooks1.merge(hooks)
-
-    await hooks1.exec('before', 'save', 'foo')
-    await hooks1.exec('before', 'create', 'foo')
-
-    await hooks.exec('before', 'save', 'foo')
-    await hooks.exec('before', 'create', 'foo')
-    assert.deepEqual(stack, ['1', '2', '3'])
+    await runner.cleanup()
+    assert.deepEqual(stack, ['one', 'three'])
   })
 })

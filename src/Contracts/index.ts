@@ -7,5 +7,7 @@
  * file that was distributed with this source code.
  */
 
-export * from './src/Contracts'
-export { Hooks } from './src/Hooks'
+export type CleanupHandler = (...args: any[]) => any | Promise<any>
+export type HooksHandler = (
+  ...args: any[]
+) => any | CleanupHandler | Promise<any> | Promise<CleanupHandler>
