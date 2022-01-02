@@ -16,6 +16,11 @@ export class Runner {
   private cleanupActions: Set<CleanupHandler> = new Set()
   constructor(private hooksHandlers?: Set<HooksHandler>, private withoutHooks?: string[]) {}
 
+  /**
+   * Find if cleanup call is pending or not
+   */
+  public isCleanupPending = true
+
   private shouldRunHandler(handler: HooksHandler): boolean {
     return this.withoutHooks ? !this.withoutHooks.includes(handler.name) : true
   }
@@ -28,6 +33,7 @@ export class Runner {
       return
     }
 
+    this.isCleanupPending = true
     for (let handler of this.hooksHandlers) {
       if (this.shouldRunHandler(handler)) {
         const cleanupAction = await handler(...data)
@@ -40,6 +46,7 @@ export class Runner {
    * Execute cleanup actions
    */
   public async cleanup(...data: any[]) {
+    this.isCleanupPending = false
     for (let action of this.cleanupActions) {
       await action(...data)
     }

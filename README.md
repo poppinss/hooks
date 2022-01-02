@@ -15,12 +15,10 @@ I find myself re-writing the code for hooks in multiple packages, so decided to 
 - [How it works?](#how-it-works)
 - [Installation](#installation)
 - [Usage](#usage)
-- [API](#api)
-    - [add(lifecycle: 'before' | 'after', action: string, handler: Function | string)](#addlifecycle-before--after-action-string-handler-function--string)
-    - [exec(lifecycle: 'before' | 'after', action: string, ...data: any[])](#execlifecycle-before--after-action-string-data-any)
-    - [remove (lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string)](#remove-lifecycle-before--after-action-string-handler-hookshandler--string)
-    - [clear(lifecycle: 'before' | 'after', action?: string)](#clearlifecycle-before--after-action-string)
-    - [merge (hooks: Hooks): void](#merge-hooks-hooks-void)
+- [Removing `before` and `after` calls with cleanup functions](#removing-before-and-after-calls-with-cleanup-functions)
+    - [Scanerio with hooks](#scanerio-with-hooks)
+  - [Scanerio with cleanup functions](#scanerio-with-cleanup-functions)
+- [Passing data to hooks](#passing-data-to-hooks)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -28,9 +26,7 @@ I find myself re-writing the code for hooks in multiple packages, so decided to 
 
 The hooks class exposes the API to `register`, `remove` and `exec` lifecycle hooks for any number of actions or events. The class API is meant to be used internally and not by the user facing code and this gives you the chance to improve the hooks DX.
 
-For example: The Lucid models uses this class internally and expose `before` and `after` methods on the model itself. Doing this, Lucid can control the autocomplete, type checking for the `before` and `after` methods itself, without relying on this package to expose the generics API.
-
-> Also generics increases the number of types Typescript has to generate and it's better to avoid them whenever possible.
+For example: The Luciod models uses this internally and exposes the API to register lifecycle hooks around model actions like `creating`, `created`, `deleting`, `deleted` and so on.
 
 ## Installation
 
@@ -51,84 +47,119 @@ Use it as follows
 import { Hooks } from '@poppinss/hooks'
 const hooks = new Hooks()
 
-hooks.add('before', 'save', function () {})
+hooks.add('creating', function () {})
+hooks.add('created', function () {})
 
-// Later invoke before save hooks
-await hooks.exec('before', 'save', { id: 1 })
+const runner = hooks.runner('creating')
+try {
+  await runner.run() // pass data here
+} finally {
+  await runner.cleaup() // pass data here
+}
 ```
 
-If you want the end user to define IoC container bindings as the hook handler, then you need to pass the `IoC` container resolver to the Hooks constructor. Following is the snippet from Lucid models.
+## Removing `before` and `after` calls with cleanup functions
+Usually hooks are modeled around `before` and `after` events. Also, the previous versions of this package also allowed registering before and after lifecycle hooks. However, I have recently removed support for that because of the following reasons.
+
+The `before` and `after` lifecycle hooks will always be prone to errors. Let's consider the following scanerio.
+
+#### Scanerio with hooks
+We have the following `before` hooks.
 
 ```ts
-import { Ioc } from '@adonisjs/fold'
-const ioc = new Ioc()
-const resolver = ioc.getResolver(undefined, 'modelHooks', 'App/Models/Hooks')
+hooks.add('before', 'save', function () {
+  createTemporaryResource()
+})
 
-const hooks = new Hooks(resolver)
-```
+hooks.add('before', 'save', function () {
+  createAnotherTemporaryResource()
+})
 
-The resolver allows the end user to pass the hook reference as string and hooks must live inside `App/Models/Hooks` folder.
+hooks.add('after', 'save', function () {
+  removeFirstTemporaryResource()
+})
 
-```ts
-hooks.add('before', 'save', 'User.encryptPassword')
-```
-
-## API
-
-#### add(lifecycle: 'before' | 'after', action: string, handler: Function | string)
-
-Add a new hook handler.
-
-```ts
-hooks.add('before', 'save', (data) => {
-  console.log(data)
+hooks.add('after', 'save', function () {
+  removeSecondTemporaryResource()
 })
 ```
 
-#### exec(lifecycle: 'before' | 'after', action: string, ...data: any[])
+**Now let's save the operation around which the lifecycle hooks were registered fails. Should we fire the `after` hooks?**
 
-Execute a given hook for a selected lifecycle.
+- If no, then temporary resources will be never be removed
+- If yes, then we will end up in the stable state.
 
-```ts
-hooks.exec('before', 'save', { username: 'virk' })
-```
+**However, what happens if the second before hook fails?** Now should we call all the `after` hooks or not? 
 
-#### remove (lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string)
+- If yes, then the `removeSecondTemporaryResource` may error out since its `before` action was never completed.
+- If not, then again we will end up in a dirty state from the first `before` hook.
 
-Remove an earlier registered hook. If you are using the IoC container bindings, then passing the binding string is enough, otherwise you need to store the reference of the function.
+As I mentioned earlier, the `before` and `after` hooks have no direct relationship and hence there is no correct way to call only the `after` hooks for which the `before` hooks completed successfully.
 
-```ts
-function onSave() {}
+Therefore, by removing the concept of `before` and `after` and using cleanup functions, we will be able to design a more robust hooks system.
 
-hooks.add('before', 'save', onSave)
+### Scanerio with cleanup functions
+Now, in the following API, the hooks themselves are responsible for returning the cleanup functions.
 
-// Later remove it
-hooks.remove('before', 'save', onSave)
-```
-
-#### clear(lifecycle: 'before' | 'after', action?: string)
-
-Clear all hooks for a given lifecycle and optionally an action.
+If the second hook fails, then we will only call the cleanup function for the first hook.
 
 ```ts
-hooks.clear('before')
+hooks.add('save', function () {
+  createTemporaryResource()
+  return removeFirstTemporaryResource
+})
 
-// Clear just for the save action
-hooks.clear('before', 'save')
+hooks.add('save', function () {
+  createAnotherTemporaryResource()
+  return removeSecondTemporaryResource
+})
 ```
 
-#### merge (hooks: Hooks): void
+## Passing data to hooks
+You can pass data to hooks at the time of running the `run` and the `cleanup` functions. For example.
 
-Merge hooks from an existing hooks instance. Useful during class inheritance.
+```ts
+import { Hooks } from '@poppinss/hooks'
+const hooks = new Hooks()
+
+hooks.add('creating', function (arg1, arg2, arg3) {})
+hooks.add('creating', function (arg1, arg2, arg3) {})
+hooks.add('creating', function (arg1, arg2, arg3) {})
+
+const runner = hooks.runner('creating')
+await runner.run('arg1', 'arg2', 'arg3')
+```
+
+It is usually helpful to inform the cleanup functions if there was an error or not. Maybe some cleanup functions may not to run only in case of errors.
 
 ```ts
 const hooks = new Hooks()
-hooks.add('before', 'save', function () {})
 
-const hooks1 = new Hooks()
-hooks1.merge(hooks)
+hooks.add('creating', function (model) {
+  const file = await saveFileToDisk()
+  model.filePath = file
 
-await hooks1.exec('before', 'save', [])
+  return (error, model) => {
+    if (error) {
+      await removeFileFromDisk(model.filePath)
+    }
+  }
+})
+
+const runner = hooks.runner('creating')
+try {
+  await runner.run(model)
+} catch (error) {
+  // During error
+  await runner.cleaup(error, model)
+}
+
+/**
+ * During success
+ */
+if (runner.isCleanupPending) {
+  await runner.cleaup(null, model)
+}
 ```
 
 [gh-workflow-image]: https://img.shields.io/github/workflow/status/poppinss/hooks/test?style=for-the-badge
