@@ -148,7 +148,11 @@ hooks.add('creating', function (model) {
 
 const runner = hooks.runner('creating')
 try {
+  // Run hooks
   await runner.run(model)
+
+  // Run the actual action
+  await model.save()
 } catch (error) {
   // During error
   await runner.cleaup(error, model)
