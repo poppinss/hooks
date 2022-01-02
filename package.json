@@ -119,5 +119,9 @@
     "bracketSpacing": true,
     "arrowParens": "always",
     "printWidth": 100
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "next"
   }
 }
