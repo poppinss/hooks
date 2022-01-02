@@ -33,10 +33,10 @@ For example: The Luciod models uses this internally and exposes the API to regis
 Install the package from npm registry as follows:
 
 ```sh
-npm i @poppinss/hooks
+npm i @poppinss/hooks@next
 
 # yarn
-yarn add @poppinss/hooks
+yarn add @poppinss/hooks@next
 ```
 
 ## Usage
