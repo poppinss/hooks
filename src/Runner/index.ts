@@ -17,9 +17,10 @@ export class Runner {
   constructor(private hooksHandlers?: Set<HooksHandler>, private withoutHooks?: string[]) {}
 
   /**
-   * Find if cleanup call is pending or not
+   * Find if cleanup call is pending or not. The cleanup is only
+   * pending when the run method has been called
    */
-  public isCleanupPending = true
+  public isCleanupPending = false
 
   private shouldRunHandler(handler: HooksHandler): boolean {
     return this.withoutHooks ? !this.withoutHooks.includes(handler.name) : true
