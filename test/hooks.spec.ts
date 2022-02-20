@@ -206,15 +206,15 @@ test.group('Run hooks', () => {
 
     hooks.add('save', () => {
       stack.push('one')
-      return () => {
-        stack.push('three')
+      return async () => {
+        stack.push('four')
       }
     })
 
     hooks.add('save', () => {
       stack.push('two')
-      return () => {
-        stack.push('four')
+      return async () => {
+        stack.push('three')
       }
     })
 

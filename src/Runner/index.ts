@@ -13,7 +13,7 @@ import { CleanupHandler, HooksHandler } from '../Contracts'
  * Runner to execute hooks and cleanup actions
  */
 export class Runner {
-  private cleanupActions: Set<CleanupHandler> = new Set()
+  private cleanupActions: CleanupHandler[] = []
   constructor(private hooksHandlers?: Set<HooksHandler>, private withoutHooks?: string[]) {}
 
   /**
@@ -38,7 +38,7 @@ export class Runner {
     for (let handler of this.hooksHandlers) {
       if (this.shouldRunHandler(handler)) {
         const cleanupAction = await handler(...data)
-        typeof cleanupAction === 'function' && this.cleanupActions.add(cleanupAction)
+        typeof cleanupAction === 'function' && this.cleanupActions.push(cleanupAction)
       }
     }
   }
@@ -48,8 +48,10 @@ export class Runner {
    */
   public async cleanup(...data: any[]) {
     this.isCleanupPending = false
-    for (let action of this.cleanupActions) {
-      await action(...data)
+
+    let startIndex = this.cleanupActions.length
+    while (startIndex--) {
+      await this.cleanupActions[startIndex](...data)
     }
   }
 }

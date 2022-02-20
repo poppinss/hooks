@@ -115,6 +115,8 @@ hooks.add('save', function () {
 })
 ```
 
+Also, the cleanup hooks runs in the reverse order. So the cleanup function for the first hook will run last.
+
 ## Passing data to hooks
 You can pass data to hooks at the time of running the `run` and the `cleanup` functions. For example.
 
