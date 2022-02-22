@@ -1,6 +1,6 @@
 {
   "name": "@poppinss/hooks",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "A no brainer hooks module for execute before/after lifecycle hooks",
   "main": "build/index.js",
   "files": [
