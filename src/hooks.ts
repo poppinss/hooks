@@ -8,7 +8,7 @@
  */
 
 import { Runner } from './runner.js'
-import { HookHandler } from './types.js'
+import { HookHandler, HookProvider } from './types.js'
 
 /**
  * Quite simple implementation register lifecycle hooks around specific events.
@@ -34,11 +34,25 @@ export class Hooks<
     new Map()
 
   /**
+   * Collection of hook providers.
+   * Hook provider are classes with methods as the event name
+   */
+  #hookProviders: Set<HookProvider> = new Set()
+
+  /**
    * Get access to all the registered hooks. The return value is
    * a map of the event name and a set of handlers.
    */
   all() {
     return this.#hooks
+  }
+
+  /**
+   * Get access to all the registered providers. The return value is
+   * a set of providers
+   */
+  providers() {
+    return this.#hookProviders
   }
 
   /**
@@ -106,6 +120,29 @@ export class Hooks<
   }
 
   /**
+   * Register a custom hook provider. Adding the same provider twice will
+   * result in a noop.
+   */
+  provider(provider: HookProvider): this {
+    this.#hookProviders.add(provider)
+    return this
+  }
+
+  /**
+   * Find if a given provider has already been registered or not
+   */
+  hasProvider(provider: HookProvider): boolean {
+    return this.#hookProviders.has(provider)
+  }
+
+  /**
+   * Remove provider
+   */
+  removeProvider(provider: HookProvider): boolean {
+    return this.#hookProviders.delete(provider)
+  }
+
+  /**
    * Merge hooks from an existing hooks instance.
    */
   merge(hooks: Hooks<Types>) {
@@ -114,12 +151,16 @@ export class Hooks<
         this.add(action, handler)
       })
     })
+
+    hooks.providers().forEach((provider) => {
+      this.provider(provider)
+    })
   }
 
   /**
    * Returns an instance of the runner to run hooks
    */
   runner(action: Types['KnownEvents']): Runner<Types['HookArgs'], Types['CleanUpArgs']> {
-    return new Runner(this.#hooks.get(action))
+    return new Runner(action, this.#hookProviders, this.#hooks.get(action))
   }
 }

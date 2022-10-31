@@ -22,10 +22,22 @@ export type HookHandler<Args extends any[], CleanUpArgs extends any[]> = (
 /**
  * The shape of the custom executor function to call hook handlers
  */
-export interface HandlerExecutor {
-  (
-    handler: (...args: any[]) => any,
-    isCleanupHandler: boolean,
-    ...args: any[]
-  ): void | Promise<void>
-}
+export type HandlerExecutor = (
+  handler: (...args: any[]) => any,
+  isCleanupHandler: boolean,
+  ...args: any[]
+) => void | Promise<void>
+
+/**
+ * Hook provider are classes with methods as the event name
+ */
+export type HookProvider = new (...args: any[]) => any
+
+/**
+ * The shape of the custom executor function to call hook providers
+ */
+export type ProviderExecutor = (
+  provider: HookProvider,
+  event: string,
+  ...args: any[]
+) => void | Promise<void>

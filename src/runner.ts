@@ -7,13 +7,30 @@
  * file that was distributed with this source code.
  */
 
-import { CleanupHandler, HandlerExecutor, HookHandler } from './types.js'
+import {
+  HookHandler,
+  HookProvider,
+  CleanupHandler,
+  HandlerExecutor,
+  ProviderExecutor,
+} from './types.js'
 
 /**
  * The default implementation invokes the handler and pass
  * data to it
  */
 const defaultHandlerExecutor: HandlerExecutor = (handler, _, ...data) => handler(...data)
+
+/**
+ * The default implementation to invoke event method on a hook
+ * provider.
+ */
+const defaultProviderExecutor: ProviderExecutor = (provider, event, ...data) => {
+  const providerInstance = new provider()
+  if (typeof providerInstance[event] === 'function') {
+    return providerInstance[event](...data)
+  }
+}
 
 /**
  * Runner allows running a set of specific hook handlers for a given
@@ -30,6 +47,11 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
    * A collection of registered hook handlers
    */
   #hookHandlers: Set<HookHandler<HookArgs, CleanUpArgs>>
+
+  /**
+   * A collection of registered hook providers
+   */
+  #hookProviders: Set<HookProvider>
 
   /**
    * Cleanup handlers should always be an array of functions. Using a set will
@@ -59,21 +81,31 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
   #handlerExecutor: HandlerExecutor = defaultHandlerExecutor
 
   /**
+   * A custom provider executor
+   */
+  #providerExecutor: ProviderExecutor = defaultProviderExecutor
+
+  /**
    * Find if cleanup is pending or not
    */
   get isCleanupPending() {
     return this.#state === 'cleanup_pending'
   }
 
-  constructor(hookHandlers?: Set<HookHandler<HookArgs, CleanUpArgs>>) {
+  constructor(
+    public action: string,
+    hookProviders: Set<HookProvider>,
+    hookHandlers?: Set<HookHandler<HookArgs, CleanUpArgs>>
+  ) {
+    this.#hookProviders = hookProviders
     this.#hookHandlers = hookHandlers || new Set()
   }
 
   /**
    * Filter to check if we should run the handler
    */
-  #filter(handler: HookHandler<HookArgs, CleanUpArgs>): boolean {
-    return !this.#handlersToIgnore.includes(handler.name)
+  #filter(handlerName: string): boolean {
+    return !this.#handlersToIgnore.includes(handlerName)
   }
 
   /**
@@ -102,6 +134,14 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
   }
 
   /**
+   * Define a custom executor to execute the hook provider
+   */
+  providerExecutor(callback: ProviderExecutor): this {
+    this.#providerExecutor = callback
+    return this
+  }
+
+  /**
    * Execute handlers
    */
   async run(...data: HookArgs): Promise<void> {
@@ -114,9 +154,25 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
       return
     }
 
+    /**
+     * Execute handlers
+     */
     for (let handler of this.#hookHandlers) {
-      if (this.#filter(handler)) {
+      if (this.#filter(handler.name)) {
         const result = await this.#handlerExecutor(handler, false, ...data)
+
+        if (typeof result === 'function') {
+          this.#cleanupHandlers.push(result)
+        }
+      }
+    }
+
+    /**
+     * Execute providers
+     */
+    for (let provider of this.#hookProviders) {
+      if (this.#filter(`${provider.name}.${this.action}`)) {
+        const result = await this.#providerExecutor(provider, this.action, ...data)
 
         if (typeof result === 'function') {
           this.#cleanupHandlers.push(result)
