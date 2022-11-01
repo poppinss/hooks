@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import { run, test } from '@japa/runner'
+import { test } from '@japa/runner'
 import { Hooks } from '../src/hooks.js'
 
 test.group('Hook provider runner', () => {

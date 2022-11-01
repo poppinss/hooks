@@ -147,9 +147,7 @@ test.group('Hooks', () => {
 
   test('assert hook handler types', () => {
     const hooks = new Hooks<{
-      KnownEvents: 'save'
-      HookArgs: [string, number]
-      CleanUpArgs: []
+      save: [[string, number], []]
     }>()
 
     // @ts-expect-error

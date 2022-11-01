@@ -20,18 +20,13 @@ import { HookHandler, HookProvider } from './types.js'
  * })
  * ```
  */
-export class Hooks<
-  Types extends {
-    KnownEvents: string
-    HookArgs: any[]
-    CleanUpArgs: any[]
-  }
-> {
+export class Hooks<Events extends Record<string, [any[], any[]]>> {
   /**
    * A collection of registered hooks
    */
-  #hooks: Map<Types['KnownEvents'], Set<HookHandler<Types['HookArgs'], Types['CleanUpArgs']>>> =
-    new Map()
+  #hooks: {
+    [Event in keyof Events]: Map<Event, Set<HookHandler<Events[Event][0], Events[Event][1]>>>
+  }[keyof Events] = new Map()
 
   /**
    * Collection of hook providers.
@@ -58,9 +53,9 @@ export class Hooks<
   /**
    * Find if a handler for a given event exists.
    */
-  has(
-    event: Types['KnownEvents'],
-    handler: HookHandler<Types['HookArgs'], Types['CleanUpArgs']>
+  has<Event extends keyof Events>(
+    event: Event,
+    handler: HookHandler<Events[Event][0], Events[Event][1]>
   ): boolean {
     const handlers = this.#hooks.get(event)
     if (!handlers) {
@@ -74,9 +69,9 @@ export class Hooks<
    * Add a hook handler for a given event. Adding the same handler twice will
    * result in a noop.
    */
-  add(
-    event: Types['KnownEvents'],
-    handler: HookHandler<Types['HookArgs'], Types['CleanUpArgs']>
+  add<Event extends keyof Events>(
+    event: Event,
+    handler: HookHandler<Events[Event][0], Events[Event][1]>
   ): this {
     const handlers = this.#hooks.get(event)
 
@@ -94,9 +89,9 @@ export class Hooks<
   /**
    * Remove hook handler for a given event.
    */
-  remove(
-    event: Types['KnownEvents'],
-    handler: HookHandler<Types['HookArgs'], Types['CleanUpArgs']>
+  remove<Event extends keyof Events>(
+    event: Event,
+    handler: HookHandler<Events[Event][0], Events[Event][1]>
   ): boolean {
     const handlers = this.#hooks.get(event)
     if (!handlers) {
@@ -110,7 +105,7 @@ export class Hooks<
    * Clear all the hooks for a specific event or all the
    * events.
    */
-  clear(event?: Types['KnownEvents']): void {
+  clear(event?: keyof Events): void {
     if (!event) {
       this.#hooks.clear()
       return
@@ -145,7 +140,7 @@ export class Hooks<
   /**
    * Merge hooks from an existing hooks instance.
    */
-  merge(hooks: Hooks<Types>) {
+  merge(hooks: Hooks<Events>) {
     hooks.all().forEach((actionHooks, action) => {
       actionHooks.forEach((handler) => {
         this.add(action, handler)
@@ -160,7 +155,9 @@ export class Hooks<
   /**
    * Returns an instance of the runner to run hooks
    */
-  runner(action: Types['KnownEvents']): Runner<Types['HookArgs'], Types['CleanUpArgs']> {
+  runner<Event extends Extract<keyof Events, string>>(
+    action: Event
+  ): Runner<Events[Event][0], Events[Event][1]> {
     return new Runner(action, this.#hookProviders, this.#hooks.get(action))
   }
 }
