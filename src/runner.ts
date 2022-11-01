@@ -197,5 +197,6 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
     }
 
     this.#state = 'cleanup_completed'
+    this.#cleanupHandlers = []
   }
 }

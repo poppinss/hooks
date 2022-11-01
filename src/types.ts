@@ -37,7 +37,7 @@ export type HookProvider = new (...args: any[]) => any
  * The shape of the custom executor function to call hook providers
  */
 export type ProviderExecutor = (
-  provider: HookProvider,
+  Provider: HookProvider,
   event: string,
   ...args: any[]
 ) => void | Promise<void>

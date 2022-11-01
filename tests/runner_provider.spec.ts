@@ -108,4 +108,27 @@ test.group('Hook provider runner', () => {
 
     assert.deepEqual(stack, ['before save', 'via executor'])
   })
+
+  test('filter certain provider hooks', async ({ assert }) => {
+    const hooks = new Hooks()
+    const stack: LifecycleManagement[] = []
+
+    class LifecycleManagement {
+      save() {
+        stack.push(this)
+      }
+
+      create() {
+        stack.push(this)
+      }
+    }
+
+    hooks.provider(LifecycleManagement)
+
+    await hooks.runner('save').run()
+    await hooks.runner('create').without(['LifecycleManagement.create']).run()
+
+    assert.lengthOf(stack, 1)
+    assert.instanceOf(stack[0], LifecycleManagement)
+  })
 })
