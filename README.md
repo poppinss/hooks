@@ -1,13 +1,13 @@
 # @poppinss/hooks
-> A simple, yet effective implementation for executing hooks around an event.
+> A simple yet effective implementation for executing hooks around an event.
 
 [![gh-workflow-image]][gh-workflow-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url] [![synk-image]][synk-url]
 
-Hooks is a zero dependency implementation for running lifecycle hooks around an event. Following are some of the notable features.
+This package is a zero-dependency implementation for running lifecycle hooks around an event. Following are some of the notable features.
 
 - Register and run lifecycle hooks.
 - Hooks can return cleanup functions that are executed to perform the cleanup.
-- Alongside "hooks as functions", you can also register hook providers, which encapsulates event handlers inside a class.
+- Alongside "hooks as functions", you can also register hook providers, which encapsulate event handlers inside a class.
 - Super lightweight
 
 ## Setup
@@ -47,7 +47,7 @@ hooks.add('saving', function () {
 ```
 
 ## Running hooks
-You can execute hooks using the Hooks Runner. You can create a new instance of the runner by calling the `hooks.runner` method and pass the event name for which you want to execute hooks.
+You can execute hooks using the Hooks Runner. You can create a new runner instance by calling the `hooks.runner` method and passing the event name for which you want to execute hooks.
 
 ```ts
 const hooks = new Hooks()
@@ -57,7 +57,7 @@ await runner.run()
 ```
 
 ### Passing data to hooks
-You can pass one or more arguments to the `runner.run` method, which inturn will be shared with the hook callbacks. For example:
+You can pass one or more arguments to the `runner.run` method, which the runner will share with the hook callbacks. For example:
 
 ```ts
 const hooks = new Hooks()
@@ -70,12 +70,12 @@ await runner.run(model, transaction)
 ```
 
 ## Cleanup functions
-Cleanup functions allows hooks to cleanup after themselves after the main action finishes successfully or with an error. Let's consider a real world example of saving a model to the database.
+Cleanup functions allow hooks to clean up after themselves after the main action finishes successfully or with an error. Let's consider a real-world example of saving a model to the database.
 
 - You will first run the `saving` hooks.
 - Assume one of the `saving` hooks writes some files to the disk.
-- Next, you issue the insert query to the database and the query fails.
-- The hook that has written files to the disk would want to remove those files as the main operation got cancelled with an error.
+- Next, you issue the insert query to the database, and the query fails.
+- The hook that has written files to the disk would want to remove those files as the main operation got canceled with an error.
 
 Following is how you can express that with cleanup functions.
 
@@ -85,7 +85,7 @@ hooks.add('saving', function () {
 
   // Return the cleanup function
   return (error) => {
-    // In case of error, remove file
+    // In case of an error, remove the file
     if (error) {
       await fs.unlink()
     }
@@ -97,9 +97,9 @@ The code responsible for issuing the insert query should run hooks as follows.
 
 ```ts
 const runner = hooks.runner('saving')
-await runner.run(model)
 
 try {
+  await runner.run(model)
   await model.save()
 } catch (error) {
   // Perform cleanup and pass error
@@ -111,10 +111,10 @@ try {
 await runner.cleanup()
 ```
 
-> **Note:** The `runner.cleanup` method is idempotent, therefore you can call it multiple times and yet it will run the underlying cleanup methods only once.
+> **Note**: The `runner.cleanup` method is idempotent. Therefore you can call it multiple times, yet it will run the underlying cleanup methods only once.
 
 ## Hook Providers
-Hook providers are classes with the event lifecycle methods on them. Providers are great when you want to listen for multiple events to create a single cohesive feature. Again, taking the example of models, you can create a hook provider to listen for all the hooks and manage a changelog of table columns.
+Hook providers are classes with the event lifecycle methods on them. Providers are great when you want to listen to multiple events to create a single cohesive feature. Again, taking the example of models, you can make a hook provider listen for all the hooks and manage a changelog of table columns.
 
 ```ts
 class ChangeSetProvider {
@@ -149,7 +149,7 @@ await hooks.runner('deleted').run()
 ## Run without hook handlers
 You can exclude certain hook handlers from executing using the `without` method.
 
-In the following example, we run hooks without executing the `generateDefaultAvatar` hook handler. As you can notice, you can specify function as a string.
+In the following example, we run hooks without executing the `generateDefaultAvatar` hook handler. As you can notice, you can specify the function name as a string.
 
 ```ts
 hooks.add('saving', function hashPassword () {})
@@ -161,7 +161,7 @@ await hooks
   .run()
 ```
 
-With hook providers, you can specify the provider class and the method name.
+You can specify the provider class and the method name with hook providers.
 
 ```ts
 class ChangeSetProvider {
@@ -177,9 +177,9 @@ await hooks
 ```
 
 ## Custom executors
-The hooks runner allows you to define custom executors for calling the hook callback functions or the provider lifecycle methods. They are helpful, when you want to tweak how a method should run.
+The hooks runner allows you to define custom executors for calling the hook callback functions or the provider lifecycle methods. They are helpful when you want to tweak how a method should run.
 
-For example: AdonisJS uses the IoC container to call the provider lifecycle methods.
+For example, AdonisJS uses the IoC container to call the provider lifecycle methods.
 
 In the following example, the custom executor is responsible for calling the hook callback functions.
 
@@ -250,7 +250,7 @@ const hooks = new Hooks<Events>()
 [npm-url]: https://npmjs.org/package/@poppinss/hooks 'npm'
 
 [license-image]: https://img.shields.io/npm/l/@poppinss/hooks?color=blueviolet&style=for-the-badge
-[license-url]: LICENSE.md 'license'
+[license-url]: LICENSE.md 'license.'
 
 [synk-image]: https://img.shields.io/snyk/vulnerabilities/github/poppinss/hooks?label=Synk%20Vulnerabilities&style=for-the-badge
 [synk-url]: https://snyk.io/test/github/poppinss/hooks?targetFile=package.json 'synk'
