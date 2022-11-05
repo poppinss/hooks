@@ -7,7 +7,6 @@ This package is a zero-dependency implementation for running lifecycle hooks aro
 
 - Register and run lifecycle hooks.
 - Hooks can return cleanup functions that are executed to perform the cleanup.
-- Alongside "hooks as functions", you can also register hook providers, which encapsulate event handlers inside a class.
 - Super lightweight
 
 ## Setup
@@ -45,6 +44,19 @@ hooks.add('saving', function () {
   console.log('called')
 })
 ```
+
+You can also define hook as an object with the `name` and the `handle` method property. This is usually helpful when you want to specify a custom name for the hook, or re-use the same handle method multiple times.
+
+```ts
+const hooks = new Hooks()
+
+function handleSave() {}
+
+hooks.add('saving', { name: 'beforeSave', handle: handleSave })
+hooks.add('creating', { name: 'beforeCreate', handle: handleSave })
+```
+
+The `handle` method receives the first argument as the event name, followed by the rest of the arguments supplied during runtime.
 
 ## Running hooks
 You can execute hooks using the Hooks Runner. You can create a new runner instance by calling the `hooks.runner` method and passing the event name for which you want to execute hooks.
@@ -113,39 +125,6 @@ await runner.cleanup()
 
 > **Note**: The `runner.cleanup` method is idempotent. Therefore you can call it multiple times, yet it will run the underlying cleanup methods only once.
 
-## Hook Providers
-Hook providers are classes with the event lifecycle methods on them. Providers are great when you want to listen to multiple events to create a single cohesive feature. Again, taking the example of models, you can make a hook provider listen for all the hooks and manage a changelog of table columns.
-
-```ts
-class ChangeSetProvider {
-  created() {
-    // listens for created event
-  }
-
-  updated() {
-    // listens for updated event
-  }
-
-  deleted() {
-    // listens for deleted event
-  }
-}
-```
-
-Next, register the provider as follows.
-
-```ts
-hooks.provider(ChangeSetProvider)
-```
-
-Run hooks
-
-```ts
-await hooks.runner('created').run()
-await hooks.runner('updated').run()
-await hooks.runner('deleted').run()
-```
-
 ## Run without hook handlers
 You can exclude certain hook handlers from executing using the `without` method.
 
@@ -159,61 +138,6 @@ await hooks
   .runner('saving')
   .without(['generateDefaultAvatar'])
   .run()
-```
-
-You can specify the provider class and the method name with hook providers.
-
-```ts
-class ChangeSetProvider {
-  created() {}
-}
-
-hooks.provider(ChangeSetProvider)
-
-await hooks
-  .runner('created')
-  .without(['ChangeSetProvider.created'])
-  .run()
-```
-
-## Custom executors
-The hooks runner allows you to define custom executors for calling the hook callback functions or the provider lifecycle methods. They are helpful when you want to tweak how a method should run.
-
-For example, AdonisJS uses the IoC container to call the provider lifecycle methods.
-
-In the following example, the custom executor is responsible for calling the hook callback functions.
-
-```ts
-hooks.add('saving', function hashPassword () {})
-hooks.add('saving', function generateDefaultAvatar () {})
-
-hooks
-  .runner('saving')
-  .executor((handler, isCleanupFunction, ...data) => {
-    console.log(handler.name)
-    return handler(...data)
-  })
-  .run(model)
-```
-
-Similarly, you can also define a custom executor for the provider classes.
-
-```ts
-class ChangeSetProvider {
-  created() {}
-}
-
-hooks.provider(ChangeSetProvider)
-
-await hooks
-  .runner('created')
-  .providerExecutor((Provider, event, ...data) => {
-    const provider = new Provider()
-    if (typeof provider[event] === 'function') {
-      return provider[event](...data)
-    }
-  })
-  .run(model)
 ```
 
 ## Event types

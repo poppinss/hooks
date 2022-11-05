@@ -128,49 +128,4 @@ test.group('Runner Cleanup', () => {
     assert.isFalse(runner.isCleanupPending)
     assert.deepEqual(stack, ['before save', 'before save 1', 'cleanup', 'cleanup'])
   })
-
-  test('use custom executor to call cleanup handlers', async ({ assert }) => {
-    const hooks = new Hooks()
-    let stack: string[] = []
-
-    function beforeSave() {
-      stack.push('before save')
-      return (...messages: string[]) => {
-        stack = stack.concat(messages)
-      }
-    }
-    hooks.add('save', beforeSave)
-
-    function beforeSave1() {
-      stack.push('before save 1')
-      return (...messages: string[]) => {
-        stack = stack.concat(messages)
-      }
-    }
-    hooks.add('save', beforeSave1)
-
-    const runner = hooks.runner('save')
-    runner.executor((handler, isCleanupHandler, ...args) => {
-      if (isCleanupHandler) {
-        return handler(...args.concat('via executor'))
-      }
-
-      return handler(...args)
-    })
-
-    await runner.run()
-    assert.isTrue(runner.isCleanupPending)
-
-    await runner.cleanup('cleanup')
-
-    assert.isFalse(runner.isCleanupPending)
-    assert.deepEqual(stack, [
-      'before save',
-      'before save 1',
-      'cleanup',
-      'via executor',
-      'cleanup',
-      'via executor',
-    ])
-  })
 })

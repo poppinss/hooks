@@ -153,28 +153,60 @@ test.group('Runner', () => {
     assert.deepEqual(stack, [])
   })
 
-  test('use custom executor for executing hooks', async ({ assert }) => {
+  test('run object based hooks', async ({ assert }) => {
     const hooks = new Hooks()
     let stack: string[] = []
 
     function beforeSave(...args: string[]) {
       stack = stack.concat(args)
     }
-    hooks.add('save', beforeSave)
+    hooks.add('save', {
+      name: 'beforeSave',
+      handle(_, ...args: string[]) {
+        return beforeSave(...args.concat(['via executor']))
+      },
+    })
 
     function beforeSave1(...args: string[]) {
       stack = stack.concat(args)
     }
+    hooks.add('save', {
+      name: 'beforeSave1',
+      handle(_, ...args: string[]) {
+        return beforeSave1(...args.concat(['via executor']))
+      },
+    })
+
+    const runner = hooks.runner('save')
+    await runner.run('before save')
+
+    assert.deepEqual(stack, ['before save', 'via executor', 'before save', 'via executor'])
+  })
+
+  test('filter hooks by explicit name', async ({ assert }) => {
+    const hooks = new Hooks()
+    const stack: string[] = []
+
+    const beforeSave = {
+      name: 'models.beforeSave',
+      handle() {
+        stack.push('before save')
+      },
+    }
+    hooks.add('save', beforeSave)
+
+    const beforeSave1 = {
+      name: 'models.beforeSave1',
+      handle() {
+        stack.push('before save 1')
+      },
+    }
     hooks.add('save', beforeSave1)
 
     const runner = hooks.runner('save')
-    await runner
-      .executor((handler, _, ...args) => {
-        return handler(...args.concat('via executor'))
-      })
-      .run('before save')
+    await runner.without(['models.beforeSave1']).run()
 
-    assert.deepEqual(stack, ['before save', 'via executor', 'before save', 'via executor'])
+    assert.deepEqual(stack, ['before save'])
   })
 
   test('work fine when there are no hook handlers', async ({ assert }) => {

@@ -21,6 +21,19 @@ test.group('Hooks', () => {
     assert.isTrue(hooks.has('save', beforeSave))
   })
 
+  test('add hook as an object with handle method', ({ assert }) => {
+    const hooks = new Hooks()
+
+    const beforeSave = {
+      name: 'beforeSave',
+      handle() {},
+    }
+    hooks.add('save', beforeSave)
+
+    assert.deepEqual(hooks.all(), new Map([['save', new Set([beforeSave])]]))
+    assert.isTrue(hooks.has('save', beforeSave))
+  })
+
   test('add multiple hooks for a given event', ({ assert }) => {
     const hooks = new Hooks()
 
@@ -50,6 +63,32 @@ test.group('Hooks', () => {
     hooks.add('save', beforeSave)
 
     function beforeSave1() {}
+    hooks.add('save', beforeSave1)
+
+    assert.deepEqual(hooks.all(), new Map([['save', new Set([beforeSave, beforeSave1])]]))
+    assert.isTrue(hooks.has('save', beforeSave))
+    assert.isTrue(hooks.has('save', beforeSave1))
+
+    hooks.remove('save', beforeSave)
+
+    assert.isFalse(hooks.has('save', beforeSave))
+    assert.isTrue(hooks.has('save', beforeSave1))
+    assert.deepEqual(hooks.all(), new Map([['save', new Set([beforeSave1])]]))
+  })
+
+  test('remove object based hooks', ({ assert }) => {
+    const hooks = new Hooks()
+
+    const beforeSave = {
+      name: 'beforeSave',
+      handle() {},
+    }
+    hooks.add('save', beforeSave)
+
+    const beforeSave1 = {
+      name: 'beforeSave1',
+      handle() {},
+    }
     hooks.add('save', beforeSave1)
 
     assert.deepEqual(hooks.all(), new Map([['save', new Set([beforeSave, beforeSave1])]]))
