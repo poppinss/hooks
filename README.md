@@ -164,7 +164,7 @@ And then pass it as a generic to the `Hooks` class.
 const hooks = new Hooks<Events>()
 ```
 
-[gh-workflow-image]: https://img.shields.io/github/workflow/status/poppinss/hooks/test?style=for-the-badge
+[gh-workflow-image]: https://img.shields.io/github/actions/workflow/status/poppinss/hooks/test.yml?style=for-the-badge
 [gh-workflow-url]: https://github.com/poppinss/hooks/actions/workflows/test.yml "Github action"
 
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
