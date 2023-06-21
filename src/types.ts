@@ -7,6 +7,13 @@
  * file that was distributed with this source code.
  */
 
+import type { Runner } from './runner.js'
+
+/**
+ * Exporting hooks runner as a type
+ */
+export { Runner }
+
 /**
  * Shape of the cleanup handler
  */
@@ -18,6 +25,13 @@ export type CleanupHandler<Args extends any[]> = (...args: Args) => void | Promi
 export type HookHandler<Args extends any[], CleanUpArgs extends any[]> = (
   ...args: Args
 ) => void | CleanupHandler<CleanUpArgs> | Promise<void> | Promise<CleanupHandler<CleanUpArgs>>
+
+/**
+ * Extracts args from a hook handler type
+ */
+export type ExtractHookHandlerArgs<Handler> = Handler extends HookHandler<infer A, infer B>
+  ? [A, B]
+  : never
 
 /**
  * Hook represented as an object with handle method
