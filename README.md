@@ -1,4 +1,5 @@
 # @poppinss/hooks
+
 > A simple yet effective implementation for executing hooks around an event.
 
 [![gh-workflow-image]][gh-workflow-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url] [![synk-image]][synk-url]
@@ -10,6 +11,7 @@ This package is a zero-dependency implementation for running lifecycle hooks aro
 - Super lightweight
 
 ## Setup
+
 Install the package from the npm packages registry.
 
 ```sh
@@ -35,6 +37,7 @@ await hooks.runner('saving').run()
 ```
 
 ## Defining hooks
+
 The hooks are defined using the `hooks.add` method. The method accepts the event name and a callback function to execute.
 
 ```ts
@@ -59,6 +62,7 @@ hooks.add('creating', { name: 'beforeCreate', handle: handleSave })
 The `handle` method receives the first argument as the event name, followed by the rest of the arguments supplied during runtime.
 
 ## Running hooks
+
 You can execute hooks using the Hooks Runner. You can create a new runner instance by calling the `hooks.runner` method and passing the event name for which you want to execute hooks.
 
 ```ts
@@ -69,19 +73,20 @@ await runner.run()
 ```
 
 ### Passing data to hooks
+
 You can pass one or more arguments to the `runner.run` method, which the runner will share with the hook callbacks. For example:
 
 ```ts
 const hooks = new Hooks()
 
-hooks.add('saving', function (model, transaction) {
-})
+hooks.add('saving', function (model, transaction) {})
 
 const runner = hooks.runner('saving')
 await runner.run(model, transaction)
 ```
 
 ## Cleanup functions
+
 Cleanup functions allow hooks to clean up after themselves after the main action finishes successfully or with an error. Let's consider a real-world example of saving a model to the database.
 
 - You will first run the `saving` hooks.
@@ -126,21 +131,20 @@ await runner.cleanup()
 > **Note**: The `runner.cleanup` method is idempotent. Therefore you can call it multiple times, yet it will run the underlying cleanup methods only once.
 
 ## Run without hook handlers
+
 You can exclude certain hook handlers from executing using the `without` method.
 
 In the following example, we run hooks without executing the `generateDefaultAvatar` hook handler. As you can notice, you can specify the function name as a string.
 
 ```ts
-hooks.add('saving', function hashPassword () {})
-hooks.add('saving', function generateDefaultAvatar () {})
+hooks.add('saving', function hashPassword() {})
+hooks.add('saving', function generateDefaultAvatar() {})
 
-await hooks
-  .runner('saving')
-  .without(['generateDefaultAvatar'])
-  .run()
+await hooks.runner('saving').without(['generateDefaultAvatar']).run()
 ```
 
 ## Event types
+
 You can also specify the types of supported events and their arguments well in advance as follows.
 
 The first step is to define a type for all the events.
@@ -150,11 +154,11 @@ type Events = {
   saving: [
     [BaseModel], // for hook handler
     [error: Error | null, BaseModel] // for cleanup function
-  ],
+  ]
   finding: [
     [QueryBuilder], // for hook handler
     [error: Error | null, QueryBuilder] // for cleanup function
-  ],
+  ]
 }
 ```
 
@@ -165,16 +169,12 @@ const hooks = new Hooks<Events>()
 ```
 
 [gh-workflow-image]: https://img.shields.io/github/actions/workflow/status/poppinss/hooks/test.yml?style=for-the-badge
-[gh-workflow-url]: https://github.com/poppinss/hooks/actions/workflows/test.yml "Github action"
-
+[gh-workflow-url]: https://github.com/poppinss/hooks/actions/workflows/test.yml 'Github action'
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
 [typescript-url]: "typescript"
-
 [npm-image]: https://img.shields.io/npm/v/@poppinss/hooks.svg?style=for-the-badge&logo=npm
 [npm-url]: https://npmjs.org/package/@poppinss/hooks 'npm'
-
 [license-image]: https://img.shields.io/npm/l/@poppinss/hooks?color=blueviolet&style=for-the-badge
 [license-url]: LICENSE.md 'license.'
-
 [synk-image]: https://img.shields.io/snyk/vulnerabilities/github/poppinss/hooks?label=Synk%20Vulnerabilities&style=for-the-badge
 [synk-url]: https://snyk.io/test/github/poppinss/hooks?targetFile=package.json 'synk'
