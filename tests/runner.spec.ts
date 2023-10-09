@@ -113,6 +113,25 @@ test.group('Runner', () => {
     assert.deepEqual(stack, ['hello world', 'hello world'])
   })
 
+  test('pass multiple arguments to hook handlers', async ({ assert }) => {
+    const hooks = new Hooks()
+    const stack: string[] = []
+
+    hooks.add('save', (message: string, message1: string) => {
+      stack.push(message)
+      stack.push(message1)
+    })
+    hooks.add('save', (message: string, message1: string) => {
+      stack.push(message)
+      stack.push(message1)
+    })
+
+    const runner = hooks.runner('save')
+    await runner.run('hi world', 'hello world')
+
+    assert.deepEqual(stack, ['hi world', 'hello world', 'hi world', 'hello world'])
+  })
+
   test('filter hooks by name', async ({ assert }) => {
     const hooks = new Hooks()
     const stack: string[] = []
