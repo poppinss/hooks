@@ -218,4 +218,29 @@ test.group('Runner', () => {
 
     assert.deepEqual(stack, [])
   })
+
+  test('execute async hooks in reverse order', async ({ assert }) => {
+    const hooks = new Hooks()
+    const stack: string[] = []
+
+    function beforeSave() {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          stack.push('before save')
+          resolve()
+        }, 100)
+      })
+    }
+    hooks.add('save', beforeSave)
+
+    function beforeSave1() {
+      stack.push('before save 1')
+    }
+    hooks.add('save', beforeSave1)
+
+    const runner = hooks.runner('save')
+    await runner.runReverse()
+
+    assert.deepEqual(stack, ['before save 1', 'before save'])
+  })
 })

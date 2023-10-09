@@ -89,9 +89,9 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
   }
 
   /**
-   * Execute handlers
+   * Executing hooks
    */
-  async run(...data: HookArgs): Promise<void> {
+  async #exec(reverse: boolean, data: HookArgs) {
     if (this.#state !== 'idle') {
       return
     }
@@ -101,10 +101,8 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
       return
     }
 
-    /**
-     * Execute handlers
-     */
-    for (let handler of this.#hookHandlers) {
+    const handlers = reverse ? Array.from(this.#hookHandlers).reverse() : this.#hookHandlers
+    for (let handler of handlers) {
       if (this.#filter(handler.name)) {
         const result = await (typeof handler === 'function'
           ? handler(...data)
@@ -115,6 +113,20 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
         }
       }
     }
+  }
+
+  /**
+   * Execute handlers
+   */
+  async run(...data: HookArgs): Promise<void> {
+    return this.#exec(false, data)
+  }
+
+  /**
+   * Execute handlers in reverse order
+   */
+  async runReverse(...data: HookArgs): Promise<void> {
+    return this.#exec(true, data)
   }
 
   /**

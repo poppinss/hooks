@@ -72,6 +72,15 @@ const runner = hooks.runner('saving')
 await runner.run()
 ```
 
+To run hooks in the reverse order, you can use the `runner.runReverse` method.
+
+```ts
+const hooks = new Hooks()
+
+const runner = hooks.runner('saving')
+await runner.runReverse()
+```
+
 ### Passing data to hooks
 
 You can pass one or more arguments to the `runner.run` method, which the runner will share with the hook callbacks. For example:
