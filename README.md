@@ -1,138 +1,184 @@
-<div align="center"><img src="https://res.cloudinary.com/adonisjs/image/upload/q_100/v1557762307/poppinss_iftxlt.jpg" width="600px"></div>
+# @poppinss/hooks
 
-# Hooks
+> A simple yet effective implementation for executing hooks around an event.
 
-> A no brainer module to execute lifecycle hooks in sequence.
+[![gh-workflow-image]][gh-workflow-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url]
 
-[![gh-workflow-image]][gh-workflow-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url] [![synk-image]][synk-url]
+This package is a zero-dependency implementation for running lifecycle hooks around an event. Following are some of the notable features.
 
-I find myself re-writing the code for hooks in multiple packages, so decided to extract it to it's own module, that can be re-used by other modules of AdonisJS.
+- Register and run lifecycle hooks.
+- Hooks can return cleanup functions that are executed to perform the cleanup.
+- Super lightweight
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-## Table of contents
+## Setup
 
-- [How it works?](#how-it-works)
-- [Installation](#installation)
-- [Usage](#usage)
-- [API](#api)
-    - [add(lifecycle: 'before' | 'after', action: string, handler: Function | string)](#addlifecycle-before--after-action-string-handler-function--string)
-    - [exec(lifecycle: 'before' | 'after', action: string, ...data: any[])](#execlifecycle-before--after-action-string-data-any)
-    - [remove (lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string)](#remove-lifecycle-before--after-action-string-handler-hookshandler--string)
-    - [clear(lifecycle: 'before' | 'after', action?: string)](#clearlifecycle-before--after-action-string)
-    - [merge (hooks: Hooks): void](#merge-hooks-hooks-void)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-## How it works?
-
-The hooks class exposes the API to `register`, `remove` and `exec` lifecycle hooks for any number of actions or events. The class API is meant to be used internally and not by the user facing code and this gives you the chance to improve the hooks DX.
-
-For example: The Lucid models uses this class internally and expose `before` and `after` methods on the model itself. Doing this, Lucid can control the autocomplete, type checking for the `before` and `after` methods itself, without relying on this package to expose the generics API.
-
-> Also generics increases the number of types Typescript has to generate and it's better to avoid them whenever possible.
-
-## Installation
-
-Install the package from npm registry as follows:
+Install the package from the npm packages registry.
 
 ```sh
 npm i @poppinss/hooks
 
-# yarn
+# yarn lovers
 yarn add @poppinss/hooks
 ```
 
-## Usage
-
-Use it as follows
+And import the `Hooks` class as follows.
 
 ```ts
-import { Hooks } from '@poppinss/hooks'
+import Hooks from '@poppinss/hooks'
+
 const hooks = new Hooks()
 
-hooks.add('before', 'save', function () {})
+hooks.add('saving', function () {
+  console.log('called')
+})
 
-// Later invoke before save hooks
-await hooks.exec('before', 'save', { id: 1 })
+// Execute hooks using runner
+await hooks.runner('saving').run()
 ```
 
-If you want the end user to define IoC container bindings as the hook handler, then you need to pass the `IoC` container resolver to the Hooks constructor. Following is the snippet from Lucid models.
+## Defining hooks
+
+The hooks are defined using the `hooks.add` method. The method accepts the event name and a callback function to execute.
 
 ```ts
-import { Ioc } from '@adonisjs/fold'
-const ioc = new Ioc()
-const resolver = ioc.getResolver(undefined, 'modelHooks', 'App/Models/Hooks')
+const hooks = new Hooks()
 
-const hooks = new Hooks(resolver)
-```
-
-The resolver allows the end user to pass the hook reference as string and hooks must live inside `App/Models/Hooks` folder.
-
-```ts
-hooks.add('before', 'save', 'User.encryptPassword')
-```
-
-## API
-
-#### add(lifecycle: 'before' | 'after', action: string, handler: Function | string)
-
-Add a new hook handler.
-
-```ts
-hooks.add('before', 'save', (data) => {
-  console.log(data)
+hooks.add('saving', function () {
+  console.log('called')
 })
 ```
 
-#### exec(lifecycle: 'before' | 'after', action: string, ...data: any[])
-
-Execute a given hook for a selected lifecycle.
-
-```ts
-hooks.exec('before', 'save', { username: 'virk' })
-```
-
-#### remove (lifecycle: 'before' | 'after', action: string, handler: HooksHandler | string)
-
-Remove an earlier registered hook. If you are using the IoC container bindings, then passing the binding string is enough, otherwise you need to store the reference of the function.
-
-```ts
-function onSave() {}
-
-hooks.add('before', 'save', onSave)
-
-// Later remove it
-hooks.remove('before', 'save', onSave)
-```
-
-#### clear(lifecycle: 'before' | 'after', action?: string)
-
-Clear all hooks for a given lifecycle and optionally an action.
-
-```ts
-hooks.clear('before')
-
-// Clear just for the save action
-hooks.clear('before', 'save')
-```
-
-#### merge (hooks: Hooks): void
-
-Merge hooks from an existing hooks instance. Useful during class inheritance.
+You can also define hook as an object with the `name` and the `handle` method property. This is usually helpful when you want to specify a custom name for the hook, or re-use the same handle method multiple times.
 
 ```ts
 const hooks = new Hooks()
-hooks.add('before', 'save', function () {})
 
-const hooks1 = new Hooks()
-hooks1.merge(hooks)
+function handleSave() {}
 
-await hooks1.exec('before', 'save', [])
+hooks.add('saving', { name: 'beforeSave', handle: handleSave })
+hooks.add('creating', { name: 'beforeCreate', handle: handleSave })
 ```
 
-[gh-workflow-image]: https://img.shields.io/github/workflow/status/poppinss/hooks/test?style=for-the-badge
-[gh-workflow-url]: https://github.com/poppinss/hooks/actions/workflows/test.yml "Github action"
+The `handle` method receives the first argument as the event name, followed by the rest of the arguments supplied during runtime.
+
+## Running hooks
+
+You can execute hooks using the Hooks Runner. You can create a new runner instance by calling the `hooks.runner` method and passing the event name for which you want to execute hooks.
+
+```ts
+const hooks = new Hooks()
+
+const runner = hooks.runner('saving')
+await runner.run()
+```
+
+To run hooks in the reverse order, you can use the `runner.runReverse` method.
+
+```ts
+const hooks = new Hooks()
+
+const runner = hooks.runner('saving')
+await runner.runReverse()
+```
+
+### Passing data to hooks
+
+You can pass one or more arguments to the `runner.run` method, which the runner will share with the hook callbacks. For example:
+
+```ts
+const hooks = new Hooks()
+
+hooks.add('saving', function (model, transaction) {})
+
+const runner = hooks.runner('saving')
+await runner.run(model, transaction)
+```
+
+## Cleanup functions
+
+Cleanup functions allow hooks to clean up after themselves after the main action finishes successfully or with an error. Let's consider a real-world example of saving a model to the database.
+
+- You will first run the `saving` hooks.
+- Assume one of the `saving` hooks writes some files to the disk.
+- Next, you issue the insert query to the database, and the query fails.
+- The hook that has written files to the disk would want to remove those files as the main operation got canceled with an error.
+
+Following is how you can express that with cleanup functions.
+
+```ts
+hooks.add('saving', function () {
+  await fs.writeFile()
+
+  // Return the cleanup function
+  return (error) => {
+    // In case of an error, remove the file
+    if (error) {
+      await fs.unlink()
+    }
+  }
+})
+```
+
+The code responsible for issuing the insert query should run hooks as follows.
+
+```ts
+const runner = hooks.runner('saving')
+
+try {
+  await runner.run(model)
+  await model.save()
+} catch (error) {
+  // Perform cleanup and pass error
+  await runner.cleanup(error)
+  throw error
+}
+
+// Perform cleanup in case of success as well
+await runner.cleanup()
+```
+
+> **Note**: The `runner.cleanup` method is idempotent. Therefore you can call it multiple times, yet it will run the underlying cleanup methods only once.
+
+## Run without hook handlers
+
+You can exclude certain hook handlers from executing using the `without` method.
+
+In the following example, we run hooks without executing the `generateDefaultAvatar` hook handler. As you can notice, you can specify the function name as a string.
+
+```ts
+hooks.add('saving', function hashPassword() {})
+hooks.add('saving', function generateDefaultAvatar() {})
+
+await hooks.runner('saving').without(['generateDefaultAvatar']).run()
+```
+
+## Event types
+
+You can also specify the types of supported events and their arguments well in advance as follows.
+
+The first step is to define a type for all the events.
+
+```ts
+type Events = {
+  saving: [
+    [BaseModel], // for hook handler
+    [error: Error | null, BaseModel] // for cleanup function
+  ]
+  finding: [
+    [QueryBuilder], // for hook handler
+    [error: Error | null, QueryBuilder] // for cleanup function
+  ]
+}
+```
+
+And then pass it as a generic to the `Hooks` class.
+
+```ts
+const hooks = new Hooks<Events>()
+```
+
+[gh-workflow-image]: https://img.shields.io/github/actions/workflow/status/poppinss/hooks/checks.yml?style=for-the-badge
+[gh-workflow-url]: https://github.com/poppinss/hooks/actions/workflows/checks.yml 'Github action'
 
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
 [typescript-url]: "typescript"
@@ -141,7 +187,4 @@ await hooks1.exec('before', 'save', [])
 [npm-url]: https://npmjs.org/package/@poppinss/hooks 'npm'
 
 [license-image]: https://img.shields.io/npm/l/@poppinss/hooks?color=blueviolet&style=for-the-badge
-[license-url]: LICENSE.md 'license'
-
-[synk-image]: https://img.shields.io/snyk/vulnerabilities/github/poppinss/hooks?label=Synk%20Vulnerabilities&style=for-the-badge
-[synk-url]: https://snyk.io/test/github/poppinss/hooks?targetFile=package.json 'synk'
+[license-url]: LICENSE.md 'license.'
