@@ -7,7 +7,10 @@
  * file that was distributed with this source code.
  */
 
+import { debuglog } from 'node:util'
 import { HookHandler, CleanupHandler, HookHandlerProvider } from './types.js'
+
+const debug = debuglog('poppinss:hooks')
 
 /**
  * Runner allows running a set of specific hook handlers for a given
@@ -79,9 +82,11 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
    */
   without(handlersToIgnore?: string[]): this {
     if (!handlersToIgnore) {
+      debug('skipping all hooks')
       this.#skipAllHooks = true
     } else {
       this.#skipAllHooks = false
+      debug('skipping %O hooks', handlersToIgnore)
       this.#handlersToIgnore = handlersToIgnore
     }
 
@@ -101,14 +106,23 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
       return
     }
 
+    debug('running hooks')
+
     const handlers = reverse ? Array.from(this.#hookHandlers).reverse() : this.#hookHandlers
     for (let handler of handlers) {
       if (this.#filter(handler.name)) {
+        if (handler.name) {
+          debug('running hook %s', handler.name)
+        }
+
         const result = await (typeof handler === 'function'
           ? handler(...data)
           : handler.handle(this.action, ...data))
 
         if (typeof result === 'function') {
+          if (handler.name) {
+            debug('cleanup scheduled by %s hook', handler.name)
+          }
           this.#cleanupHandlers.push(result)
         }
       }
@@ -138,6 +152,7 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
     }
 
     this.#state = 'cleanup_initiated'
+    debug('performing cleanup')
 
     let startIndex = this.#cleanupHandlers.length
     while (startIndex--) {
