@@ -29,9 +29,8 @@ export type HookHandler<Args extends any[], CleanUpArgs extends any[]> = (
 /**
  * Extracts args from a hook handler type
  */
-export type ExtractHookHandlerArgs<Handler> = Handler extends HookHandler<infer A, infer B>
-  ? [A, B]
-  : never
+export type ExtractHookHandlerArgs<Handler> =
+  Handler extends HookHandler<infer A, infer B> ? [A, B] : never
 
 /**
  * Hook represented as an object with handle method

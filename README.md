@@ -162,11 +162,11 @@ The first step is to define a type for all the events.
 type Events = {
   saving: [
     [BaseModel], // for hook handler
-    [error: Error | null, BaseModel] // for cleanup function
+    [error: Error | null, BaseModel], // for cleanup function
   ]
   finding: [
     [QueryBuilder], // for hook handler
-    [error: Error | null, QueryBuilder] // for cleanup function
+    [error: Error | null, QueryBuilder], // for cleanup function
   ]
 }
 ```
@@ -179,12 +179,9 @@ const hooks = new Hooks<Events>()
 
 [gh-workflow-image]: https://img.shields.io/github/actions/workflow/status/poppinss/hooks/checks.yml?style=for-the-badge
 [gh-workflow-url]: https://github.com/poppinss/hooks/actions/workflows/checks.yml 'Github action'
-
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
 [typescript-url]: "typescript"
-
 [npm-image]: https://img.shields.io/npm/v/@poppinss/hooks.svg?style=for-the-badge&logo=npm
 [npm-url]: https://npmjs.org/package/@poppinss/hooks 'npm'
-
 [license-image]: https://img.shields.io/npm/l/@poppinss/hooks?color=blueviolet&style=for-the-badge
 [license-url]: LICENSE.md 'license.'
