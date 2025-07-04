@@ -8,7 +8,7 @@
  */
 
 import { Runner } from './runner.js'
-import { HookHandler, HookHandlerProvider } from './types.js'
+import { type HookHandler, type HookHandlerProvider } from './types.js'
 
 /**
  * Quite simple implementation register lifecycle hooks around specific events.

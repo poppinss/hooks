@@ -8,7 +8,7 @@
  */
 
 import { debuglog } from 'node:util'
-import { HookHandler, CleanupHandler, HookHandlerProvider } from './types.js'
+import { type HookHandler, type CleanupHandler, type HookHandlerProvider } from './types.js'
 
 const debug = debuglog('poppinss:hooks')
 
