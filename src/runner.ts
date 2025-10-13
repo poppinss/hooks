@@ -54,12 +54,12 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Find if cleanup is pending or not
-   * 
+   *
    * @example
    * ```ts
    * const runner = hooks.runner('saving')
    * await runner.run()
-   * 
+   *
    * if (runner.isCleanupPending) {
    *   await runner.cleanup()
    * }
@@ -71,10 +71,10 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Create a new Runner instance
-   * 
+   *
    * @param action - The name of the event/action this runner handles
    * @param hookHandlers - Optional set of hook handlers to initialize with
-   * 
+   *
    * @example
    * ```ts
    * const runner = new Runner('saving', new Set([handler1, handler2]))
@@ -91,7 +91,7 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Filter to check if we should run the handler
-   * 
+   *
    * @param handlerName - The name of the handler to check
    */
   #filter(handlerName: string): boolean {
@@ -102,14 +102,14 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
    * Ignore specific or all hook handlers. Calling this
    * method multiple times will result in overwriting
    * the existing state.
-   * 
+   *
    * @param handlersToIgnore - Array of handler names to ignore, or undefined to skip all hooks
-   * 
+   *
    * @example
    * ```ts
    * // Skip specific handlers
    * runner.without(['hashPassword', 'validateEmail']).run()
-   * 
+   *
    * // Skip all handlers
    * runner.without().run()
    * ```
@@ -129,7 +129,7 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Executing hooks
-   * 
+   *
    * @param reverse - Whether to execute handlers in reverse order
    * @param data - Arguments to pass to the hook handlers
    */
@@ -168,9 +168,9 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Execute handlers
-   * 
+   *
    * @param data - Arguments to pass to the hook handlers
-   * 
+   *
    * @example
    * ```ts
    * const runner = hooks.runner('saving')
@@ -183,9 +183,9 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Execute handlers in reverse order
-   * 
+   *
    * @param data - Arguments to pass to the hook handlers
-   * 
+   *
    * @example
    * ```ts
    * const runner = hooks.runner('deleting')
@@ -198,14 +198,14 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Execute cleanup actions
-   * 
+   *
    * @param data - Arguments to pass to the cleanup handlers
-   * 
+   *
    * @example
    * ```ts
    * const runner = hooks.runner('saving')
    * await runner.run(user)
-   * 
+   *
    * // Later, cleanup any resources
    * await runner.cleanup(user)
    * ```
