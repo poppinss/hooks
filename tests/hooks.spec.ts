@@ -195,4 +195,14 @@ test.group('Hooks', () => {
     // @ts-expect-error
     hooks.add('create', () => {})
   })
+
+  test('check if hooks exists for a given event', ({ assert }) => {
+    const hooks = new Hooks()
+
+    function beforeSave() {}
+    hooks.add('save', beforeSave)
+
+    assert.isTrue(hooks.has('save'))
+    assert.isFalse(hooks.has('create'))
+  })
 })

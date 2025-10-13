@@ -47,7 +47,7 @@ export class Hooks<Events extends Record<string, [any[], any[]]>> {
    */
   has<Event extends keyof Events>(
     event: Event,
-    handler:
+    handler?:
       | HookHandler<Events[Event][0], Events[Event][1]>
       | HookHandlerProvider<Events[Event][0], Events[Event][1]>
   ): boolean {
@@ -56,7 +56,11 @@ export class Hooks<Events extends Record<string, [any[], any[]]>> {
       return false
     }
 
-    return handlers.has(handler)
+    if (handler) {
+      return handlers.has(handler)
+    }
+
+    return true
   }
 
   /**
