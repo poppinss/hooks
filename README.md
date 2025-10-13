@@ -177,6 +177,81 @@ And then pass it as a generic to the `Hooks` class.
 const hooks = new Hooks<Events>()
 ```
 
+## Additional API Methods
+
+### Check if hooks exist
+
+You can check if any hooks are registered for a specific event using the `has` method:
+
+```ts
+const hooks = new Hooks()
+
+hooks.add('saving', function hashPassword() {})
+
+// Check if any hooks exist for an event
+if (hooks.has('saving')) {
+  console.log('Saving hooks are registered')
+}
+
+// Check if a specific handler exists
+if (hooks.has('saving', hashPasswordHandler)) {
+  console.log('Hash password handler is registered')
+}
+```
+
+### Remove hook handlers
+
+Remove a specific hook handler using the `remove` method:
+
+```ts
+const hooks = new Hooks()
+const handler = function hashPassword() {}
+
+hooks.add('saving', handler)
+
+// Remove the handler
+const removed = hooks.remove('saving', handler)
+console.log(removed) // true if handler was found and removed
+```
+
+### Get all registered hooks
+
+Access all registered hooks using the `all` method:
+
+```ts
+const hooks = new Hooks()
+const allHooks = hooks.all()
+console.log(allHooks.size) // Number of events with handlers
+```
+
+### Merge hooks from another instance
+
+Combine hooks from multiple instances using the `merge` method:
+
+```ts
+const hooks1 = new Hooks()
+const hooks2 = new Hooks()
+
+hooks2.add('saving', handler1)
+hooks2.add('deleting', handler2)
+
+// Merge hooks2 into hooks1
+hooks1.merge(hooks2)
+```
+
+### Check cleanup state
+
+You can check if cleanup is pending on a runner:
+
+```ts
+const runner = hooks.runner('saving')
+await runner.run()
+
+if (runner.isCleanupPending) {
+  await runner.cleanup()
+}
+```
+
 [gh-workflow-image]: https://img.shields.io/github/actions/workflow/status/poppinss/hooks/checks.yml?style=for-the-badge
 [gh-workflow-url]: https://github.com/poppinss/hooks/actions/workflows/checks.yml 'Github action'
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript

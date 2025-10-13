@@ -54,11 +54,32 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Find if cleanup is pending or not
+   * 
+   * @example
+   * ```ts
+   * const runner = hooks.runner('saving')
+   * await runner.run()
+   * 
+   * if (runner.isCleanupPending) {
+   *   await runner.cleanup()
+   * }
+   * ```
    */
   get isCleanupPending() {
     return this.#state === 'cleanup_pending'
   }
 
+  /**
+   * Create a new Runner instance
+   * 
+   * @param action - The name of the event/action this runner handles
+   * @param hookHandlers - Optional set of hook handlers to initialize with
+   * 
+   * @example
+   * ```ts
+   * const runner = new Runner('saving', new Set([handler1, handler2]))
+   * ```
+   */
   constructor(
     public action: string,
     hookHandlers?: Set<
@@ -70,6 +91,8 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Filter to check if we should run the handler
+   * 
+   * @param handlerName - The name of the handler to check
    */
   #filter(handlerName: string): boolean {
     return !this.#handlersToIgnore.includes(handlerName)
@@ -79,6 +102,17 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
    * Ignore specific or all hook handlers. Calling this
    * method multiple times will result in overwriting
    * the existing state.
+   * 
+   * @param handlersToIgnore - Array of handler names to ignore, or undefined to skip all hooks
+   * 
+   * @example
+   * ```ts
+   * // Skip specific handlers
+   * runner.without(['hashPassword', 'validateEmail']).run()
+   * 
+   * // Skip all handlers
+   * runner.without().run()
+   * ```
    */
   without(handlersToIgnore?: string[]): this {
     if (!handlersToIgnore) {
@@ -95,6 +129,9 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Executing hooks
+   * 
+   * @param reverse - Whether to execute handlers in reverse order
+   * @param data - Arguments to pass to the hook handlers
    */
   async #exec(reverse: boolean, data: HookArgs) {
     if (this.#state !== 'idle') {
@@ -131,6 +168,14 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Execute handlers
+   * 
+   * @param data - Arguments to pass to the hook handlers
+   * 
+   * @example
+   * ```ts
+   * const runner = hooks.runner('saving')
+   * await runner.run(user, { email: 'new@example.com' })
+   * ```
    */
   async run(...data: HookArgs): Promise<void> {
     return this.#exec(false, data)
@@ -138,6 +183,14 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Execute handlers in reverse order
+   * 
+   * @param data - Arguments to pass to the hook handlers
+   * 
+   * @example
+   * ```ts
+   * const runner = hooks.runner('deleting')
+   * await runner.runReverse(user)
+   * ```
    */
   async runReverse(...data: HookArgs): Promise<void> {
     return this.#exec(true, data)
@@ -145,6 +198,17 @@ export class Runner<HookArgs extends any[], CleanUpArgs extends any[]> {
 
   /**
    * Execute cleanup actions
+   * 
+   * @param data - Arguments to pass to the cleanup handlers
+   * 
+   * @example
+   * ```ts
+   * const runner = hooks.runner('saving')
+   * await runner.run(user)
+   * 
+   * // Later, cleanup any resources
+   * await runner.cleanup(user)
+   * ```
    */
   async cleanup(...data: CleanUpArgs) {
     if (!this.isCleanupPending) {
