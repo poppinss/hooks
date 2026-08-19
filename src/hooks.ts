@@ -234,7 +234,7 @@ export class Hooks<Events extends Record<string, [any[], any[]]>> {
    * await runner.run(user)
    * ```
    */
-  runner<Event extends Extract<keyof Events, string>>(
+  runner<Event extends keyof Events & string>(
     action: Event
   ): Runner<Events[Event][0], Events[Event][1]> {
     return new Runner(action, this.#hooks.get(action))
