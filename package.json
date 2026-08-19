@@ -1,6 +1,6 @@
 {
   "name": "@poppinss/hooks",
-  "version": "7.3.0",
+  "version": "7.3.1",
   "description": "Hooks module for executing before/after lifecycle hooks",
   "type": "module",
   "files": [
